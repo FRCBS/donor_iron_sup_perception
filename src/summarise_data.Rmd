@@ -15,6 +15,8 @@ TODO:
 
 -compare sample to all donors (and/or FinDonors/Biobank)
 
+-do a version where you remove others than male female
+
 
 ```{r setup, include=FALSE}
 #echo "rmarkdown::render('summarise_data.Rmd', clean=TRUE,output_format='html_document',output_file='../results/summarise_data.html')" | R --slave
@@ -24,7 +26,84 @@ knitr::opts_chunk$set(
 	warning = FALSE
 )
 library(tidyverse)
+library(gtsummary)
 
+```
+
+
+
+```{r}
+load("../data/donorironpercep.rdata")
+```
+
+# Demographics
+
+## Age
+
+```{r}
+
+p <- ggplot(data %>% filter( `2: What is your gender?` == "Male" | `2: What is your gender?` == "Female"))
+p <- p +  geom_histogram(aes(x=`1: What is your age?`),binwidth = 5)
+p <- p + facet_wrap(. ~ `2: What is your gender?`)
+p
+
+```
+
+Looks quite different from our normal donation population. Make explicit comparison.
+
+```{r}
+data2<- data
+colnames(data2) <- str_replace_all(colnames(data2),pattern = " ", "_") %>% 
+  str_replace_all(.,".*:_","") %>% 
+  str_replace_all(.,"\\?","") %>% 
+  str_replace_all(.,",","")
+
+```
+
+
+```{r}
+
+table2 <-
+  tbl_summary(
+    data2,
+    include = c(
+      What_is_your_age,
+      In_what_kind_of_area_are_you_do_you_live,
+      What_is_the_highest_form_of_education_which_you_have_completed,
+      In_general_how_do_you_rate_your_health,
+      Do_you_currently_eat_a_vegetarian_or_vegan_diet
+      ),
+    by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table2
+```
+
+
+## Donation history
+
+```{r}
+table3 <-
+  tbl_summary(
+    data2,
+    include = c(
+      How_many_times_have_you_donated_whole_blood_in_your_lifetime,
+      When_was_your_most_recent_donation,
+      ),
+    by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table3
+
+```
+
+
+heatmap of question 10 as specified for Jan
+
+
+```{r}
 
 ```
 
