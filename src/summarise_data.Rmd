@@ -1,0 +1,30 @@
+---
+title: "Donor iron supplement perception data summary FI"
+author: "Mikko Arvas"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    theme: united
+---
+
+
+TODO:
+
+-summarise all questions
+
+-compare sample to all donors (and/or FinDonors/Biobank)
+
+
+```{r setup, include=FALSE}
+#echo "rmarkdown::render('summarise_data.Rmd', clean=TRUE,output_format='html_document',output_file='../results/summarise_data.html')" | R --slave
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+library(tidyverse)
+
+
+```
+
