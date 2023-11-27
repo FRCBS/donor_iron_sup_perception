@@ -27,7 +27,7 @@ knitr::opts_chunk$set(
 )
 library(tidyverse)
 library(gtsummary)
-
+library(likert)
 ```
 
 
@@ -49,7 +49,9 @@ p
 
 ```
 
-Looks quite different from our normal donation population. Make explicit comparison.
+
+Looks quite different from our normal donation population. Make explicit comparison later!
+
 
 ```{r}
 data2<- data
@@ -100,10 +102,373 @@ table3
 ```
 
 
-heatmap of question 10 as specified for Jan
-
 
 ```{r}
+#You do no need to add row breaks to questions if you just replace  "_" with " "
+# findmid <- function(x,sep="_") {
+#   z <- str_locate_all(x, sep)
+#     z <- z[[1]][,"start"]
+#   zno <- z[ceiling(length(z)/2)] 
+#   z1 <- str_sub(x,start = 1L, end=zno - 1)
+#   z2 <- str_sub(x,start = zno, end=-1L)
+#   z <- str_c(z1,"\n",z2)
+#   z
+# }
 
 ```
+
+
+# Blood service conduct
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^10\\.\\d"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 5
+
+q10 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q10, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+# Donation symptoms
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^11\\.\\d"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 4
+
+levels(data$`11.1: Bruises at the location where the needle was inserted`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+# Donation symptoms - severity
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^12\\.\\d"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 4
+
+levels(data$`12.10: Please indicate the severity of the symptoms? Thirst`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+# Donation knowledge
+
+## Donation general knowledge
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^13\\.\\d"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`13.1: During each donation, a donor gives approximately 500ml (16 oz.) of blood`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^14\\.\\d"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`14.1: During each donation, a donor gives approximately 500ml (16 oz.) of blood`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+## Donation hemoglobin knowledge
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^15\\.\\d"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`15.2: Hemoglobin transports oxygen through the body`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^16\\.\\d"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`16.2: Hemoglobin transports oxygen through the body`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+
+
+## Donation ferritin knowledge
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^17\\.\\d"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`17.1: Iron is needed for the production of hemoglobin in the body`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^18\\.\\d"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`18.1: Iron is needed for the production of hemoglobin in the body`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+## Donation knowledge measurments
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^19\\.\\d"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`19.1: Are any of the following blood values measured by FRCBS before, during or after donation? Hemoglobin (Hb)`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+## Donation knowledge process
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^20"))) %>% 
+    mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`20: What happens if a donor has a low hemoglobin value prior to donating? Hemoglobin is not measured`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
 
