@@ -13,9 +13,13 @@ TODO:
 
 -summarise all questions
 
--compare sample to all donors (and/or FinDonors/Biobank)
+- There is an extra dot in the questions 23 that needs to be removed!
 
--do a version where you remove others than male female
+-compare sample to all donors (and/or FinDonors/Biobank) -> put that to another script
+
+-do a version where you remove others than male female (or assign them to male female is possible) -> thats results can be made public and you can make a sex split
+
+
 
 
 ```{r setup, include=FALSE}
@@ -28,6 +32,7 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(gtsummary)
 library(likert)
+library(sjPlot)
 ```
 
 
@@ -123,14 +128,17 @@ table3
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^10\\.\\d"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^10\\.\\d"))) #%>% 
+#    mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 5
+```
 
+
+```{r , warning=FALSE}
 q10 <- likert(
   items = as.data.frame(items),
   nlevels = nlevels
@@ -150,8 +158,8 @@ plot(q10,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^11\\.\\d"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^11\\.\\d"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
@@ -182,13 +190,13 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^12\\.\\d"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^12\\.\\d"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
-nlevels = 4
+nlevels = 6
 
 levels(data$`12.10: Please indicate the severity of the symptoms? Thirst`)
 
@@ -216,8 +224,8 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^13\\.\\d"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^13\\.\\d"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
@@ -247,8 +255,8 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^14\\.\\d"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^14\\.\\d"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
@@ -281,8 +289,8 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^15\\.\\d"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^15\\.\\d"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
@@ -312,8 +320,8 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^16\\.\\d"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^16\\.\\d"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
@@ -348,8 +356,8 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^17\\.\\d"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^17\\.\\d"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
@@ -379,8 +387,8 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^18\\.\\d"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^18\\.\\d"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
@@ -410,8 +418,8 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^19\\.\\d"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^19\\.\\d"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
@@ -441,11 +449,10 @@ plot(q11,
 ## Donation knowledge process
 
 
-
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^20"))) %>% 
-    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^20"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
 #colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
@@ -470,5 +477,461 @@ plot(q11,
      include.histogram = FALSE)
 ```
 
+# Have you ever been deferred
+
+
+```{r}
+table2 <-
+  tbl_summary(
+    data2,
+    include = c(
+      Have_you_ever_been_deferred_or_ineligible_to_donate_due_to_low_hemoglobin
+      ),
+    by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table2
+
+```
+
+## When was the last deferral
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^22"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`22: When was your last deferral? 1-2 years ago`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+## Was the information about deferral ...
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^23"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 5
+
+levels(data$`23.1: Was the information you received about your deferral from the blood service: Understandable`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+# Missing information
+
+```{r}
+
+table2 <-
+  tbl_summary(
+    data2,
+    include = c(
+      Which_information_was_missing_from_the_information_you_received_about_your_deferral_from_the_blood_service
+            ),
+    by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table2
+
+
+```
+
+
+## Motivation
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^25|^26"))) #%>% 
+    #mutate_all( ~ as.numeric(.x))
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 5
+
+levels(data$`26: If you would be deferred due to low hemoglobin, what effect would this have on your motivation to continue to donate?`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+# Iron deficiency 
+
+## Symptoms
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^27"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`27: Do you know what possible symptoms of iron deficiency (a lack of iron in the body) are? Dark stool`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^27"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`27: Do you know what possible symptoms of iron deficiency (a lack of iron in the body) are? Dark stool`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Replacement
+
+
+
+```{r}
+
+table2 <-
+  tbl_summary(
+    data2,
+    include = c(
+      When_you_donate_blood_you_lose_some_iron_as_well_do_you_do_anything_before_you_donate_to_help_to_manage_any_iron_lose,
+      How_do_you_take_the_amount_of_iron_you_lose_during_a_donation_into_account
+            ),
+    by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table2
+
+
+```
+
+## Information
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^30"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 2
+
+levels(data$`27: Do you know what possible symptoms of iron deficiency (a lack of iron in the body) are? Dark stool`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+# Opinion on supplements
+
+## Iron
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^32"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
+
+nlevels = 5
+
+levels(data$`32.1: What is your opinion on the use of iron supplements? Bad (1) -  Good (5)`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Dietary
+
+
+```{r}
+table2 <-
+  tbl_summary(
+    data2,
+    include = c(
+      Do_you_take_dietary_supplements_containing_vitamin_D,
+      Do_you_take_other_dietary_supplements
+            ),
+    by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table2
+
+```
+
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^35"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+
+nlevels = 2
+
+levels(data$`35.1: Why did/do you take dietary supplements? It was advised by a professional`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+```{r}
+ table(      data2$`Is_there_a_different_reason_why_you_use(d)_dietary_supplements`)
+```
+
+## Iron supplements statements
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^38"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+
+nlevels = 2
+
+levels(data$`38.1: Are the following statements about iron supplements true or false? Iron supplements are provided by the blood service to donors with reduced iron levels`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^39"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+
+nlevels = 2
+
+levels(data$`39.1: Are the following statements about iron supplements true or false? confidence Iron supplements are provided by the blood service to donors with reduced iron levels`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+## Iron supplement side effects
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^40"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+
+nlevels = 2
+
+levels(data$`39.1: Are the following statements about iron supplements true or false? confidence Iron supplements are provided by the blood service to donors with reduced iron levels`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Use
+
+```{r}
+
+table2 <-
+  tbl_summary(
+    data2,
+    include = c(
+      Have_you_ever_taken_or_are_you_currently_taking_iron_supplements
+            ),
+    by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table2
+
+
+```
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^42"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+
+nlevels = 3
+
+levels(data$`42.1: What experiences do you have with iron supplements? Physical fitness`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
 
 
