@@ -745,7 +745,7 @@ plot(q11,
 data %>% count(`36: Is there a different reason why you use(d) dietary supplements?`)
 ```
 
-## Iron supplements statements
+## Iron statements
 
 ```{r , warning=FALSE}
 items = data2 %>% 
@@ -800,7 +800,7 @@ plot(q11,
 ```
 
 
-## Iron supplement side effects
+## Iron side effects
 
 
 ```{r , warning=FALSE}
@@ -829,7 +829,7 @@ plot(q11,
      include.histogram = FALSE)
 ```
 
-## Use
+## Iron use
 
 ```{r}
 
@@ -877,7 +877,7 @@ plot(q11,
 ```
 
 
-## Concerns
+## Iron concerns
 
 ```{r , warning=FALSE}
 items = data2 %>% 
@@ -905,7 +905,7 @@ plot(q11,
      include.histogram = FALSE)
 ```
 
-## Reaction to offer
+## Reaction to offering iron
 
 ```{r , warning=FALSE}
 items = data2 %>% 
@@ -942,7 +942,7 @@ data %>% count(`46: What would be your most important reason to take iron supple
 
 ```
 
-## Reason for use
+## Reason to use iron
 
 
 
@@ -976,7 +976,7 @@ plot(q11,
 
 
 
-## Willingness
+## Willingness to use iron
 
 ```{r , warning=FALSE}
 items = data2 %>% 
