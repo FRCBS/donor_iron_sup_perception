@@ -32,7 +32,7 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(gtsummary)
 library(likert)
-library(sjPlot)
+
 ```
 
 
@@ -80,7 +80,7 @@ table2 <-
       In_general_how_do_you_rate_your_health,
       Do_you_currently_eat_a_vegetarian_or_vegan_diet
       ),
-    by = What_is_your_gender, # split table by group
+    #by = What_is_your_gender, # split table by group
     missing = "no" # don't list missing data separately
   ) %>%
   add_n()  # add column with total number of non-missing observations
@@ -98,7 +98,7 @@ table3 <-
       How_many_times_have_you_donated_whole_blood_in_your_lifetime,
       When_was_your_most_recent_donation,
       ),
-    by = What_is_your_gender, # split table by group
+    #by = What_is_your_gender, # split table by group
     missing = "no" # don't list missing data separately
   ) %>%
   add_n()  # add column with total number of non-missing observations
@@ -487,7 +487,7 @@ table2 <-
     include = c(
       Have_you_ever_been_deferred_or_ineligible_to_donate_due_to_low_hemoglobin
       ),
-    by = What_is_your_gender, # split table by group
+    #by = What_is_your_gender, # split table by group
     missing = "no" # don't list missing data separately
   ) %>%
   add_n()  # add column with total number of non-missing observations
@@ -566,7 +566,7 @@ table2 <-
     include = c(
       Which_information_was_missing_from_the_information_you_received_about_your_deferral_from_the_blood_service
             ),
-    by = What_is_your_gender, # split table by group
+    #by = What_is_your_gender, # split table by group
     missing = "no" # don't list missing data separately
   ) %>%
   add_n()  # add column with total number of non-missing observations
@@ -680,7 +680,7 @@ table2 <-
       When_you_donate_blood_you_lose_some_iron_as_well_do_you_do_anything_before_you_donate_to_help_to_manage_any_iron_lose,
       How_do_you_take_the_amount_of_iron_you_lose_during_a_donation_into_account
             ),
-    by = What_is_your_gender, # split table by group
+    #by = What_is_your_gender, # split table by group
     missing = "no" # don't list missing data separately
   ) %>%
   add_n()  # add column with total number of non-missing observations
@@ -761,7 +761,7 @@ table2 <-
       Do_you_take_dietary_supplements_containing_vitamin_D,
       Do_you_take_other_dietary_supplements
             ),
-    by = What_is_your_gender, # split table by group
+    #by = What_is_your_gender, # split table by group
     missing = "no" # don't list missing data separately
   ) %>%
   add_n()  # add column with total number of non-missing observations
@@ -897,7 +897,7 @@ table2 <-
     include = c(
       Have_you_ever_taken_or_are_you_currently_taking_iron_supplements
             ),
-    by = What_is_your_gender, # split table by group
+  #  by = What_is_your_gender, # split table by group
     missing = "no" # don't list missing data separately
   ) %>%
   add_n()  # add column with total number of non-missing observations
@@ -935,3 +935,161 @@ plot(q11,
 ```
 
 
+## Concerns
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^43"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+
+nlevels = 2
+
+levels(data$`43.1: Do you have any concerns about iron supplements? I don’t know whether iron supplements can be harmful to my health`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Reaction to offer
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^45"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+
+nlevels = 5
+
+levels(data$`45.1: If the blood service would offer iron supplements to me, then I would gladly make use of this`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+```{r}
+
+table(data2$`What_would_be_your_most_important_reason_to_take_iron_supplements_if_they_would_be_/_when_they_have_been_provided_to_me_by_your_blood_service`)
+
+
+```
+
+## Reason for use
+
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^47"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+
+nlevels = 5
+
+levels(data$`47.1: Suppose it turns out that your iron level is too low, which of the following options would you prefer? A longer interval between donations to replenish my iron stores`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+## Willingness
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^48"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+
+nlevels = 2
+
+levels(data$`48.1: If the blood service would provide / has provided iron supplements to you, in what situation are you most willing to use them? If I would have health complaints which could be resolved by this`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Bases for policy
+
+
+```{r , warning=FALSE}
+items = data2 %>% 
+    select(which(str_detect(colnames(data) ,"^49"))) 
+
+colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
+
+nlevels = 6
+
+levels(data$`49.1: What do you think is most important when considering iron supplementation as a blood service policy for donors with low iron levels? That donors can continue to donate without larger donation intervals`)
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+data$`49.4: What do you think is most important when considering iron supplementation as a blood service policy for donors with low iron levels? That there is scientific evidence that iron supplements are safe to use and do not cause too many side effects`
+
+should have 6 levels!!!
