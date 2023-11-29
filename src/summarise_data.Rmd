@@ -9,14 +9,6 @@ output:
 ---
 
 
-TODO:
-
--veg diets???
-
--compare sample demographics distributions to all donors (and/or FinDonors/Biobank) -> put that to another script
-
--do a version where you remove others than male or female (or assign them to male or female if possible) -> that results can be made public and you can make a sex split
-
 
 
 
