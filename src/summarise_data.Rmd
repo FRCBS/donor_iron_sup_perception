@@ -11,13 +11,11 @@ output:
 
 TODO:
 
--summarise all questions
+-veg diets???
 
-- There is an extra dot in the questions 23 that needs to be removed!
+-compare sample demographics distributions to all donors (and/or FinDonors/Biobank) -> put that to another script
 
--compare sample to all donors (and/or FinDonors/Biobank) -> put that to another script
-
--do a version where you remove others than male female (or assign them to male female is possible) -> thats results can be made public and you can make a sex split
+-do a version where you remove others than male or female (or assign them to male or female if possible) -> that results can be made public and you can make a sex split
 
 
 
@@ -39,6 +37,11 @@ library(likert)
 
 ```{r}
 load("../data/donorironpercep.rdata")
+
+#We only want to look at blood donors
+data <- data %>% 
+  filter(!`8: How many times have you donated whole blood in your lifetime?` == "None")
+
 ```
 
 # Demographics
@@ -55,7 +58,7 @@ p
 ```
 
 
-Looks quite different from our normal donation population. Make explicit comparison later!
+Looks quite different from our normal donation population. Make explicit comparisons later.
 
 
 ```{r}
@@ -108,31 +111,14 @@ table3
 
 
 
-```{r}
-#You do no need to add row breaks to questions if you just replace  "_" with " "
-# findmid <- function(x,sep="_") {
-#   z <- str_locate_all(x, sep)
-#     z <- z[[1]][,"start"]
-#   zno <- z[ceiling(length(z)/2)] 
-#   z1 <- str_sub(x,start = 1L, end=zno - 1)
-#   z2 <- str_sub(x,start = zno, end=-1L)
-#   z <- str_c(z1,"\n",z2)
-#   z
-# }
-
-```
-
-
 # Blood service conduct
 
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^10\\.\\d"))) #%>% 
-#    mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^10\\.\\d"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 5
 ```
@@ -154,15 +140,13 @@ plot(q10,
 
 # Donation symptoms
 
-
+## Occurence
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^11\\.\\d"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^11\\.\\d"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 4
 
@@ -185,16 +169,14 @@ plot(q11,
 ```
 
 
-# Donation symptoms - severity
+## Severity
 
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^12\\.\\d"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^12\\.\\d"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 6
 
@@ -218,17 +200,15 @@ plot(q11,
 
 # Donation knowledge
 
-## Donation general knowledge
+## General
 
 
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^13\\.\\d"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^13\\.\\d"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -255,11 +235,9 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^14\\.\\d"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^14\\.\\d"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -283,17 +261,15 @@ plot(q11,
 
 
 
-## Donation hemoglobin knowledge
+## Hemoglobin
 
 
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^15\\.\\d"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^15\\.\\d"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -320,11 +296,9 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^16\\.\\d"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^16\\.\\d"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -350,17 +324,15 @@ plot(q11,
 
 
 
-## Donation ferritin knowledge
+## Ferritin
 
 
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^17\\.\\d"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^17\\.\\d"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -387,11 +359,9 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^18\\.\\d"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^18\\.\\d"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -414,15 +384,13 @@ plot(q11,
 ```
 
 
-## Donation knowledge measurments
+## Measurements
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^19\\.\\d"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^19\\.\\d"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -446,16 +414,14 @@ plot(q11,
 
 
 
-## Donation knowledge process
+## Process
 
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^20"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^20"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -477,33 +443,23 @@ plot(q11,
      include.histogram = FALSE)
 ```
 
-# Have you ever been deferred
+# Hb-deferral
 
+## Occurence
 
 ```{r}
-table2 <-
-  tbl_summary(
-    data2,
-    include = c(
-      Have_you_ever_been_deferred_or_ineligible_to_donate_due_to_low_hemoglobin
-      ),
-    #by = What_is_your_gender, # split table by group
-    missing = "no" # don't list missing data separately
-  ) %>%
-  add_n()  # add column with total number of non-missing observations
-table2
+
+data %>% count(`21: Have you ever been deferred or ineligible to donate due to low hemoglobin?`)
 
 ```
 
-## When was the last deferral
+## Last time
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^22"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^22"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -530,11 +486,9 @@ plot(q11,
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^23"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^23"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 5
 
@@ -556,7 +510,7 @@ plot(q11,
      include.histogram = FALSE)
 ```
 
-# Missing information
+## Missing information
 
 ```{r}
 
@@ -576,15 +530,13 @@ table2
 ```
 
 
-## Motivation
+## Effect to motivation
 
 ```{r , warning=FALSE}
 items = data2 %>% 
-    select(which(str_detect(colnames(data) ,"^25|^26"))) #%>% 
-    #mutate_all( ~ as.numeric(.x))
+    select(which(str_detect(colnames(data) ,"^25|^26"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 5
 
@@ -615,7 +567,6 @@ items = data2 %>%
     select(which(str_detect(colnames(data) ,"^27"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -645,7 +596,6 @@ items = data2 %>%
     select(which(str_detect(colnames(data) ,"^27"))) 
 
 colnames(items) <- str_replace_all(string = colnames(items),pattern = "_",replacement = " " )
-#colnames(items) <- unlist(lapply(colnames(items),FUN = findmid,sep=" "))
 
 nlevels = 2
 
@@ -800,7 +750,7 @@ plot(q11,
 
 
 ```{r}
- table(      data2$`Is_there_a_different_reason_why_you_use(d)_dietary_supplements`)
+data %>% count(`36: Is there a different reason why you use(d) dietary supplements?`)
 ```
 
 ## Iron supplements statements
@@ -995,8 +945,8 @@ plot(q11,
 
 ```{r}
 
-table(data2$`What_would_be_your_most_important_reason_to_take_iron_supplements_if_they_would_be_/_when_they_have_been_provided_to_me_by_your_blood_service`)
 
+data %>% count(`46: What would be your most important reason to take iron supplements if they would be / when they have been provided to me by your blood service?`)
 
 ```
 
@@ -1029,6 +979,8 @@ plot(q11,
      text.size=3,
      include.histogram = FALSE)
 ```
+
+"Please drag the options in the right order, with 1 being most preferred and 5 least preferred option"
 
 
 
@@ -1089,7 +1041,6 @@ plot(q11,
      include.histogram = FALSE)
 ```
 
+"Please drag the options in the right order, with 1 being most preferred and 5 least preferred option"
 
-data$`49.4: What do you think is most important when considering iron supplementation as a blood service policy for donors with low iron levels? That there is scientific evidence that iron supplements are safe to use and do not cause too many side effects`
 
-should have 6 levels!!!
