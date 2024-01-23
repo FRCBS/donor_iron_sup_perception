@@ -176,13 +176,13 @@ semPaths(fit_semplot,"std")
 tidySEM plotting understands ordered factors so no need to do anything else than drop empty factor levels.
 
 ```{r}
-cdata02 <- cdata01 %>%
+cdata03 <- cdata01 %>%
   mutate(
     across(isfactor, ~ fct_drop(.x)
     )
   )
 
-cdata02 %>%  summarise(across(everything(), ~ class(.x))) %>% t()
+cdata03 %>%  summarise(across(everything(), ~ class(.x))) %>% t()
 
 ```
 
@@ -194,7 +194,7 @@ summary(cdata02)
 ```{r}
 fit_tidysem <- sem(
   model, 
-  data = cdata02,
+  data = cdata03,
   estimator = "DWLS" 
   )
 summary(fit_semplot, standardized = TRUE)
@@ -228,28 +228,44 @@ lavaanPlot(model=fit_semplot)
 # blavaan
 
 ```{r}
-
 #https://ecmerkle.github.io/blavaan/articles/ordinal.html
 # lavaan results to blavaan results, you need to use the argument parameterization = "theta" 
 #  blavaan estimates are usually closer to estimator="PML" in lavaan.
-# fit_bla <- bsem(
-#   model, 
-#   data = cdata02,
-#   n.chains = 4,
-#   burnin = 500,
-#   target = "stan",
-#   seed="42",
-#   missing = "listwise"
-#   #,
-# #  estimator = "DWLS" 
-#   )
-# summary(fit_blaa, standardized = TRUE)
-# 
-
-#did not get this to work yet
-
+fit_bla <- bsem(
+  model,
+  data = cdata02, #only works with numeric non-categorical data
+  n.chains = 4,
+  burnin = 500,
+  target = "stan",
+  seed="42",
+  #missing = "listwise",
+  ordered = colnames(cdata02)[isordered], #but you can tell what should be categorial
+  #,
+  estimator = "DWLS"
+#estimator = "PML"
+  )
 ```
 
 
-Error in lav_options_set(opt) :
-lavaan ERROR: missing = “direct” not available in the categorical setting
+```{r}
+summary(fit_bla, standardized = TRUE)
+
+```
+
+# Compare models
+
+```{r}
+
+# x$pe$est # tuola vois olla, muuta
+#  x$pe$std.lv
+#  standardizedsolution(fit_semplot)
+ 
+regparams <- bind_rows(
+  bind_cols(parameterestimates(fit_semplot),model = "semplot" ),
+    bind_cols(parameterestimates(fit_tidysem),model = "tidysem" ), 
+ bind_cols(parameterestimates(fit_bla),model = "bla" ) 
+)
+
+#these can be done as a forest plot
+```
+
