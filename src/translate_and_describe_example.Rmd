@@ -48,45 +48,13 @@ colnames(data)
 ```
 
 
-## Time and date plots
+# Translate questions
 
-They will be removed later so plot them in here.
-
-```{r}
-
-p <- ggplot(data,aes(x=`Date` ))
-p <- p + geom_histogram()
-p
-```
-
-
-
-
-
-```{r}
-p <- ggplot(data, aes(x=as.numeric(format(as.POSIXct(`Date`), format = "%H"))))
-p <- p + geom_histogram(binwidth=1)
-p <- p + xlab("Hour")
-p
-
-```
-
-
-
-
-```{r}
-dfSummary(data,
-          plain.ascii = FALSE, 
-          style = "grid", 
-          graph.col = TRUE,
-          graph.magnif = 0.75, 
-          valid.col = FALSE, 
-          tmp.img.dir = "/tmp")
-
-```
 
 
 # Translate answers
+
+
 
 
 ## Mapping functions 
