@@ -15,7 +15,7 @@ output:
 
 ```{r setup, include=FALSE}
 
-
+  
 library(knitr)
 opts_chunk$set(#results = 'asis',      # Can also be set at the chunk-level. IT IS NEEDED IN THE dfsummary chunck
                comment = NA,
