@@ -632,13 +632,118 @@ data <- data %>%
 save(data,file="../results/donorironpercep.rdata")
 ```
 
+
+# Export summary data
+
+NB. this has not been tested it is just an example
+
 ```{r}
 
+#Read in some xslx containing all the questions and their abbreviations
+questions_with_abbr_tmp <- read_excel("../data/Kopio_DPS Variable Overview.xlsx")
+
+#Filter the questions so that they correspond to your countries data
+questions_with_abbr <- questions_with_abbr_tmp %>%  filter(!is.na(Finland))
+
+```
+
+
+
+
+
+```{r}
+#tmp should be your final data object after all the questions processing
+datawabbr <- tmp %>% 
+  #Remove Date from data 
+  select(-`Date`) %>% 
+  #Remove some unwanted questions
+  select(-(which(str_detect(colnames(tmp) ,"^37\\.\\d"))))
+
+#Name the questions from the abbreviations from xlsx if you are absolute sure that
+#they match. If you have done this earlier you don't need to do it now.
+colnames(datawabbr) <- questions_with_abbr$`Variable name`
+
+
+#Remove again some unwanted questions
+datawabbr <- datawabbr %>% select(-SupplementsOpen1,-SupplementsOpen2)
+
+#Save data
+save(datawabbr,file="../results/donorironpercepwabbr.rdata")
+
+
+```
+
+
+```{r}
+#cut age for summarisation
+datawabbr$Age <- cut(datawabbr$Age,breaks=c(min(datawabbr$Age),seq(from=25,to=65,by=10),max(datawabbr$Age)),include.lowest = TRUE)
+datawabbr$Age <- factor(datawabbr$Age,ordered = TRUE)
+
+```
+
+
+
+```{r}
+#Export summary count data
+sumlistfi <- apply(datawabbr,MARGIN = 2,FUN = table)
+saveRDS(sumlistfi,file="../results/countfi.RDS")
+
+```
+
+
+```{r}
+#Summarise column classes
 colclasses <- data %>% ungroup %>% summarise(across(everything(), ~ class(.x))) %>% t() %>% as_tibble(rownames="col")
 
 colclasses %>% count(V1)
 
 ```
+
+
+
+
+```{r}
+#Summarise column data levels
+fnlab <- function(x){
+  paste(names(table(x)),collapse = "/")
+} 
+
+fnlev <- function(x){
+  paste(levels(x),collapse = "/")
+} 
+
+all_labels <- datawabbr %>% summarise_all(
+  ~fnlab(.)
+  
+)
+all_levels <- datawabbr %>% summarise_all(
+  ~fnlev(.)
+)
+
+levs_and_labs <- bind_cols(labs=t(all_levels),levs=t(all_labels))
+ 
+levs_and_labs$col <- colnames(all_levels)
+
+questions_with_abbr_out <-    full_join(
+  questions_with_abbr_tmp,
+  colclasses,
+  by = c("Variable name"="col")
+) %>% 
+  full_join(
+    levs_and_labs,
+    by = c("Variable name"="col")
+  )
+
+
+openxlsx::write.xlsx(
+  questions_with_abbr_out,
+       file="../results/questions_classes.xlsx"
+)
+
+```
+
+
+
 
 
 
@@ -657,4 +762,6 @@ dfSummary(data,
 
 
 ```
+
+
 
