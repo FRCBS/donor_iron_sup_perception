@@ -58,6 +58,8 @@ questions <- questions %>% inner_join(
 questions %>% select('Variable name', Values)
 ```
 
+
+
 ```{r}
 
 #Extract  a vector of questions which are all answered in the same way.
@@ -102,20 +104,21 @@ qdata <- bind_rows(
   maketable(datanl[q],country="NL"),
     maketable(datafr[q],country="FR")
   )
-qdata
+head(qdata)
 ```
 
 
 ```{r}
 
 #pivot data wider 
-qdata %>% pivot_longer(
+qdata <- qdata %>% pivot_longer(
      cols = -c(Variable,Country) ,
     names_to = "answer",
     values_to = "count"
   )
 
 # Do check a bit are number correct
+head(qdata)
 ```
 
 
@@ -130,7 +133,12 @@ qdata <- bind_rows(
      cols = -c(Variable,Country) ,
     names_to = "answer",
     values_to = "count"
-  )
+  ) %>% left_join(
+    questions %>% select(Question,'Variable name'),
+    by = c("Variable" = "Variable name" )
+  ) %>% na.omit()
+
+# Add a line break after 4th space.
 
 p <- ggplot(qdata)
 p <- p + geom_col(aes(x=Country,y=count))
@@ -138,6 +146,17 @@ p <- p + facet_grid(Variable ~ answer) +
  theme(strip.text.y.right  = element_text(angle = 0)) 
 p
 
+
+```
+
+```{r}
+#Same with full questions
+
+p <- ggplot(qdata)
+p <- p + geom_col(aes(x=Country,y=count))
+p <- p + facet_grid(Question ~ answer, labeller = labeller(Question = label_wrap_gen(width=25, multi_line = TRUE)) ) +
+ theme(strip.text.y.right  = element_text(angle = 0)) 
+p
 
 ```
 
