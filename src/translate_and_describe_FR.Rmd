@@ -43,7 +43,8 @@ library(summarytools)
 
 
 ```{r}
-data <- read_excel("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - FR/iDPS - Raw data - France.xlsx")
+Data <- read_excel("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - FR/iDPS - Raw data - France.xlsx")
+data <- Data
 colnames(data)
 ```
 
@@ -66,14 +67,14 @@ names(data) <- gsub("Last donation", "Last_donation", names(data))
 #names(data) <- gsub("^Q9_5_TEXT$", "Demo_Menstruation_other", names(data))
 
 # Opinions blood service
-names(data) <- gsub("EFS is a professional organisation", "DonorOpinion1", names(data))
-names(data) <- gsub("Opportunity to ask questions", "DonorOpinion2", names(data))
-names(data) <- gsub("BS treat my personal information with care", "DonorOpinion3", names(data))
-names(data) <- gsub("I am approached personally", "DonorOpinion4", names(data))
-names(data) <- gsub("Disapointed if I could not give blood anaymore", "DonorOpinion5", names(data))
-names(data) <- gsub("I donate so I can monitor my health status", "DonorOpinion6", names(data))
-names(data) <- gsub("I trust the donor BS staff", "DonorOpinion7", names(data))
-names(data) <- gsub("confident that the health of donors is a high priority", "DonorOpinion8", names(data))
+names(data) <- gsub("EFS is a professional organisation", "OpinionBloodService1", names(data))
+names(data) <- gsub("Opportunity to ask questions", "OpinionBloodService2", names(data))
+names(data) <- gsub("BS treat my personal information with care", "OpinionBloodService3", names(data))
+names(data) <- gsub("I am approached personally", "OpinionBloodService4", names(data))
+names(data) <- gsub("Disapointed if I could not give blood anaymore", "OpinionBloodService5", names(data))
+names(data) <- gsub("I donate so I can monitor my health status", "OpinionBloodService6", names(data))
+names(data) <- gsub("I trust the donor BS staff", "OpinionBloodService7", names(data))
+names(data) <- gsub("confident that the health of donors is a high priority", "OpinionBloodService8", names(data))
 
 # Donation-related symptoms - severity
 names(data) <- gsub("Severity of bruise", "Symptoms_Donation1_Intensity", names(data))
@@ -235,15 +236,17 @@ names(data) <- gsub("Your most important reason to take iron supplement", "IronS
 
 # Preference
 names(data) <- gsub("A longer interval", "LowIron_Preference1", names(data))
-names(data) <- gsub("Dietary advice", "LowIron_Preference1", names(data))
-names(data) <- gsub("Provision of iron supplements", "LowIron_Preference1", names(data))
-names(data) <- gsub("Stop donations", "LowIron_Preference1", names(data))
+names(data) <- gsub("Dietary advice", "LowIron_Preference2", names(data))
+names(data) <- gsub("Provision of iron supplements", "LowIron_Preference3", names(data))
+names(data) <- gsub("Stop donations", "LowIron_Preference4", names(data))
 
 # Circumstance iron supplement use
 names(data) <- gsub("In what situation would you be willing to use iron supplements", "IronSupp_Circumstance", names(data))
 
 # Most important reason for providing iron supplements
 names(data) <- gsub("What do you think is most importnat whan considerng iron supplementation…", "IronSupp_Reasoning_Provision", names(data))
+
+data <- data %>% select(-"Suppose it turns out that your iron level is too low which of the following options would you prefer")
 ```
 
 
@@ -264,7 +267,6 @@ f1 <- function (x){
                   "Disagree" = "2",
                   "Neutral"="3",
                   "Agree"="4",
-                  "Totally disagree" =  "1",
                   "Totally disagree" =  "1",
                   "Totally agree" = "5"
   )
@@ -318,18 +320,19 @@ f4 <- function (x){
 }
 
 f5 <- function (x){
-  x <- fct_relevel(
-    x,
-    "50/50",
-    "100%"
+  x <- fct_recode(x, 
+    "50/50" = "0.5",
+    "100%" = "1"
   )
-x <- factor(
+  x <- factor(
     x,
-    levels=c("50/50","100%"),
+    levels = c("50/50","100%"),
     ordered = TRUE
   )
   x
 }
+
+
 
 
 f6 <- function (x){
@@ -411,10 +414,23 @@ f11 <- function (x){
 
 ```{r}
 
+for (col in names(data)) {
+  data[[col]] <- ifelse(data[[col]] == 'Not applicable', NA, data[[col]])
+}
+
+for (col in names(data)) {
+  data[[col]] <- ifelse(data[[col]] == '5 4', '5', data[[col]])
+}
+
+selected_cols <- grep("_Certainty", names(data), value = TRUE)
+data[selected_cols] <- lapply(data[selected_cols], as.character)
+
+
+
 # Columns containing just yes and no
-yesandnocols <- data %>% head(n=1) %>% mutate_all(~str_detect(.,"^No_in_some_language$")) %>% 
+yesandnocols <- data %>% head(n=1) %>% mutate_all(~str_detect(.,"^NO$")) %>% 
   bind_rows(
-data %>% head(n=1) %>% mutate_all(~str_detect(.,"^yes_in_some_language$")) ) %>% 
+data %>% head(n=1) %>% mutate_all(~str_detect(.,"^YES$")) ) %>% 
   summarise(across(everything(), ~ any(.x)))
 
 #Columns containing just 0 or 1
@@ -433,17 +449,16 @@ cols12345 <- bind_rows(cols12345,
 #49 has scale from 1-6. But if there are no 6s then it is detected here and ruins things later
 
 
-
 tmp <- data %>% 
-  mutate(`something_in_some_language` = as.Date(`something_in_some_language`)) %>% 
-  mutate( `1.0: something_in_some_language` = as.numeric(`1.0: something_in_some_language`)  ) %>%
+ # mutate(`something_in_some_language` = as.Date(`something_in_some_language`)) %>% 
+ # mutate( `1.0: something_in_some_language` = as.numeric(`1.0: something_in_some_language`)  ) %>%
   #here a set of questions is detected with some regular expression and then one of the
   #processing functions above is applied to process those questions
-  mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f1(.) ) %>% 
+  mutate_at(vars(which(str_detect(colnames(data) ,"OpinionBloodService"))), ~ f1(.) ) %>% 
   mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f2(.) ) %>% 
   mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f3(.) ) %>% 
   mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f4(.) ) %>% 
-  mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f5(.) ) %>%
+  mutate_at(vars(which(str_detect(colnames(data) ,"_Certainty"))), ~ f5(.) ) %>%
   #here instead of a regular expression, above a vector is made which tells which columns to process
   mutate_at(vars(which(as.logical(yesandnocols))), ~ f6(.) ) %>%
   mutate_at(vars(which(as.logical(zero1cols))), ~ f7(.) ) %>%
