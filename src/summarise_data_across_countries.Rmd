@@ -1,0 +1,143 @@
+---
+title: "Donor iron supplement perception data summary across countries"
+author: "Mikko Arvas"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    theme: united
+---
+
+
+
+
+
+```{r setup, include=FALSE}
+#echo "rmarkdown::render('summarise_data_across_countries.Rmd', clean=TRUE,output_format='html_document',output_file='../results/summarise_data_across_countries.html')" | R --slave
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+library(tidyverse)
+library(readxl)
+
+```
+
+
+
+```{r}
+# Read in each countries data
+datafi <- readRDS("../data/countfi.RDS")
+datanl <- readRDS("../data/countfi.RDS")
+datafr <- readRDS("../data/countfi.RDS")
+
+
+#filter the question metadata to what all have in common
+questions <- read_excel("../data/Kopio_DPS Variable Overview.xlsx")
+questions <- questions %>% inner_join( 
+  tibble(variablesfi=names(datafi)),
+         by=c("Variable name"= "variablesfi")
+         )
+                         
+
+questions <- questions %>% inner_join( 
+  tibble(variablesnl=names(datanl)),
+         by=c("Variable name"= "variablesnl")
+         )
+
+
+
+
+questions <- questions %>% inner_join( 
+  # [1:30] is just an example
+  tibble(variablesfr=names(datafr)[1:30]),
+         by=c("Variable name"= "variablesfr")
+         )
+
+questions %>% select('Variable name', Values)
+```
+
+```{r}
+
+#Extract  a vector of questions which are all answered in the same way.
+q <- questions %>% filter(Category == "Donor experience") %>% select('Variable name') %>% unlist() %>% as.vector()
+
+q
+```
+
+
+
+```{r}
+
+maketable <- function(subset,country) {
+  #Get the levels
+#  listoflevels <- unique(lapply(datafi[q],names))
+  listoflevels <- unique(lapply(subset,names))
+  #some lists are shorter due to lacking values, find the longest unique set of levels
+  listlength <- unlist(lapply(listoflevels,length))
+  cvalues <- unlist(listoflevels[which(listlength %in% max(unlist(lapply(listoflevels,length))))])
+  out <- matrix(NA, nrow = length(subset), ncol = length(cvalues))
+  colnames(out) <- cvalues
+  for (i in 1:length(subset)){
+    iname <- names(subset)[[i]]
+    for (j in cvalues) {
+      out[i,j] <- subset[[iname]][j]
+    }
+  }
+  out <- as_tibble(out)
+  out$Variable <- names(subset)
+  out$Country <- country
+  out
+}
+
+```
+
+
+```{r}
+
+#Make joint data
+qdata <- bind_rows(
+  maketable(datafi[q],country="FI"), 
+  maketable(datanl[q],country="NL"),
+    maketable(datafr[q],country="FR")
+  )
+qdata
+```
+
+
+```{r}
+
+#pivot data wider 
+qdata %>% pivot_longer(
+     cols = -c(Variable,Country) ,
+    names_to = "answer",
+    values_to = "count"
+  )
+
+# Do check a bit are number correct
+```
+
+
+```{r}
+#or just as an example do all at once
+q <- questions %>% filter(Category == "Donor experience") %>% select('Variable name') %>% unlist() %>% as.vector()
+qdata <- bind_rows(
+  maketable(datafi[q],country="FI"), 
+  maketable(datanl[q],country="NL"),
+    maketable(datafr[q],country="FR")
+  ) %>%  pivot_longer(
+     cols = -c(Variable,Country) ,
+    names_to = "answer",
+    values_to = "count"
+  )
+
+p <- ggplot(qdata)
+p <- p + geom_col(aes(x=Country,y=count))
+p <- p + facet_grid(Variable ~ answer) +
+ theme(strip.text.y.right  = element_text(angle = 0)) 
+p
+
+
+```
+
