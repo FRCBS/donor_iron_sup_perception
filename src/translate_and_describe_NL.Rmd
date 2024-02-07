@@ -5,7 +5,7 @@ date: "`r Sys.time()`"
 output:
   html_document:
     df_print: paged
-  pdf_document:
+  pdf_document: 
     fig_caption: yes
     number_sections: yes
 ---
@@ -43,13 +43,222 @@ library(summarytools)
 
 
 ```{r}
-data <- read_excel("../data/Kopio_Kyselytutkimusverenluovuttajille-5067333.xlsx")
+# Open SPSS dataset with survey data
+Data <- read_sav("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - NL/Donor Perceptie IJzersupplementen.sav")
+data <- Data
 colnames(data)
 ```
 
 
 # Translate questions
+```{r}
+# Delete unused variables
+data <- subset(data, select = -c(StartDate, EndDate, Status, Duration__in_seconds_, RecordedDate, ResponseId, DistributionChannel, UserLanguage))
 
+
+names(data) <- gsub("^Q3$", "Age", names(data))
+names(data) <- gsub("^Q8$", "Sex", names(data))
+names(data) <- gsub("^Q8_4_TEXT$", "Sex_other", names(data))
+names(data) <- gsub("^Q9$", "Menstruation", names(data))
+names(data) <- gsub("^Q9_5_TEXT$", "Menstruation_other", names(data))
+names(data) <- gsub("^Q11$", "Area", names(data))
+names(data) <- gsub("^Q12$", "Education", names(data))
+names(data) <- gsub("^Q12_7_TEXT$", "Education_other", names(data))
+names(data) <- gsub("^Q13$", "Health", names(data))
+names(data) <- gsub("^Q15$", "Diet", names(data))
+names(data) <- gsub("^Q16$", "Number_donation", names(data))
+names(data) <- gsub("^Q74$", "Last_donation", names(data))
+names(data) <- gsub("^Q92$", "Location_donation", names(data))
+
+names(data) <- gsub("^Q45_1$", "OpinionBloodService1", names(data))
+names(data) <- gsub("^Q45_2$", "OpinionBloodService2", names(data))
+names(data) <- gsub("^Q45_3$", "OpinionBloodService3", names(data))
+names(data) <- gsub("^Q45_4$", "OpinionBloodService4", names(data))
+names(data) <- gsub("^Q45_5$", "OpinionBloodService5", names(data))
+names(data) <- gsub("^Q45_6$", "OpinionBloodService6", names(data))
+names(data) <- gsub("^Q45_7$", "OpinionBloodService7", names(data))
+names(data) <- gsub("^Q45_8$", "OpinionBloodService8", names(data))
+
+names(data) <- gsub("^Q19_1$", "Symptoms1", names(data))
+names(data) <- gsub("^Q19_2$", "Symptoms2", names(data))
+names(data) <- gsub("^Q19_3$", "Symptoms3", names(data))
+names(data) <- gsub("^Q19_4$", "Symptoms4", names(data))
+names(data) <- gsub("^Q19_5$", "Symptoms5", names(data))
+names(data) <- gsub("^Q19_6$", "Symptoms6", names(data))
+
+names(data) <- gsub("^Q82_1$", "Symptoms1_Severity", names(data))
+names(data) <- gsub("^Q82_2$", "Symptoms2_Severity", names(data))
+names(data) <- gsub("^Q82_3$", "Symptoms3_Severity", names(data))
+names(data) <- gsub("^Q82_4$", "Symptoms4_Severity", names(data))
+names(data) <- gsub("^Q82_5$", "Symptoms5_Severity", names(data))
+names(data) <- gsub("^Q82_6$", "Symptoms6_Severity", names(data))
+
+names(data) <- gsub("^Q21_1$", "Knowledge1", names(data))
+names(data) <- gsub("^Q21_2$", "Knowledge2", names(data))
+names(data) <- gsub("^Q21_3$", "Knowledge3", names(data))
+names(data) <- gsub("^Q21_4$", "Knowledge4", names(data))
+
+names(data) <- gsub("^Q83_1$", "Knowledge1_Certainty", names(data))
+names(data) <- gsub("^Q83_2$", "Knowledge2_Certainty", names(data))
+names(data) <- gsub("^Q83_3$", "Knowledge3_Certainty", names(data))
+names(data) <- gsub("^Q83_4$", "Knowledge4_Certainty", names(data))
+
+names(data) <- gsub("^Q22_1$", "KnowledgeHb1", names(data))
+names(data) <- gsub("^Q22_2$", "KnowledgeHb2", names(data))
+names(data) <- gsub("^Q22_3$", "KnowledgeHb3", names(data))
+names(data) <- gsub("^Q22_4$", "KnowledgeHb4", names(data))
+names(data) <- gsub("^Q84_1$", "KnowledgeHb1_Certainty", names(data))
+names(data) <- gsub("^Q84_2$", "KnowledgeHb2_Certainty", names(data))
+names(data) <- gsub("^Q84_3$", "KnowledgeHb3_Certainty", names(data))
+names(data) <- gsub("^Q84_4$", "KnowledgeHb4_Certainty", names(data))
+
+names(data) <- gsub("^Q51_1$", "KnowledgeFer1", names(data))
+names(data) <- gsub("^Q51_2$", "KnowledgeFer2", names(data))
+names(data) <- gsub("^Q51_3$", "KnowledgeFer3", names(data))
+names(data) <- gsub("^Q51_4$", "KnowledgeFer4", names(data))
+names(data) <- gsub("^Q85_1$", "KnowledgeFer1_Certainty", names(data))
+names(data) <- gsub("^Q85_2$", "KnowledgeFer2_Certainty", names(data))
+names(data) <- gsub("^Q85_3$", "KnowledgeFer3_Certainty", names(data))
+names(data) <- gsub("^Q85_4$", "KnowledgeFer4_Certainty", names(data))
+
+names(data) <- gsub("^Q55_1$", "Measurement1", names(data))
+names(data) <- gsub("^Q55_2$", "Measurement2", names(data))
+names(data) <- gsub("^Q55_3$", "Measurement3", names(data))
+names(data) <- gsub("^Q55_4$", "Measurement4", names(data))
+names(data) <- gsub("^Q55_5$", "Measurement5", names(data))
+
+names(data) <- gsub("^Q57_1$", "ConsequenceHb1", names(data))
+names(data) <- gsub("^Q57_2$", "ConsequenceHb2", names(data))
+names(data) <- gsub("^Q57_3$", "ConsequenceHb3", names(data))
+names(data) <- gsub("^Q57_4$", "ConsequenceHb4", names(data))
+names(data) <- gsub("^Q57_5$", "ConsequenceHb5", names(data))
+names(data) <- gsub("^Q57_6$", "ConsequenceHb6", names(data))
+names(data) <- gsub("^Q57_7$", "ConsequenceHb7", names(data))
+
+names(data) <- gsub("^Q59_1$", "ConsequenceFer1", names(data))
+names(data) <- gsub("^Q59_2$", "ConsequenceFer2", names(data))
+names(data) <- gsub("^Q59_3$", "ConsequenceFer3", names(data))
+names(data) <- gsub("^Q59_4$", "ConsequenceFer4", names(data))
+names(data) <- gsub("^Q59_5$", "ConsequenceFer5", names(data))
+names(data) <- gsub("^Q59_6$", "ConsequenceFer6", names(data))
+names(data) <- gsub("^Q59_7$", "ConsequenceFer7", names(data))
+
+names(data) <- gsub("^Q62$", "Deferral", names(data))
+names(data) <- gsub("^Q76$", "Last_Deferral", names(data))
+names(data) <- gsub("^Q64_1$", "DeferralInfo1", names(data))
+names(data) <- gsub("^Q64_2$", "DeferralInfo2", names(data))
+names(data) <- gsub("^Q64_3$", "DeferralInfo3", names(data))
+names(data) <- gsub("^Q64_4$", "DeferralInfo4", names(data))
+names(data) <- gsub("^Q64_5$", "DeferralInfo5", names(data))
+names(data) <- gsub("^Q69_1$", "LackDeferralInfo1", names(data))
+names(data) <- gsub("^Q69_2$", "LackDeferralInfo2", names(data))
+names(data) <- gsub("^Q69_3$", "LackDeferralInfo3", names(data))
+names(data) <- gsub("^Q69_4$", "LackDeferralInfo4", names(data))
+names(data) <- gsub("^Q69_4_TEXT$", "LackDeferralInfoTEXT", names(data))
+
+names(data) <- gsub("^Q71_1$", "Deferral_Motivation1", names(data))
+names(data) <- gsub("^Q73_1$", "Deferral_Motivation2", names(data))
+names(data) <- gsub("^Q42_1$", "SymptomsID1", names(data))
+names(data) <- gsub("^Q42_2$", "SymptomsID2", names(data))
+names(data) <- gsub("^Q42_3$", "SymptomsID3", names(data))
+names(data) <- gsub("^Q42_4$", "SymptomsID4", names(data))
+names(data) <- gsub("^Q42_5$", "SymptomsID5", names(data))
+names(data) <- gsub("^Q42_6$", "SymptomsID6", names(data))
+names(data) <- gsub("^Q42_7$", "SymptomsID7", names(data))
+names(data) <- gsub("^Q42_8$", "SymptomsID8", names(data))
+names(data) <- gsub("^Q42_9$", "SymptomsID9", names(data))
+
+names(data) <- gsub("^Q49$", "AccForIronLoss", names(data))
+names(data) <- gsub("^Q51_1.0$", "AccForIronLoss1", names(data))
+names(data) <- gsub("^Q51_4.0$", "AccForIronLoss2", names(data))
+names(data) <- gsub("^Q51_2.0$", "AccForIronLoss3", names(data))
+names(data) <- gsub("^Q51_3.0$", "AccForIronLoss4A", names(data))
+names(data) <- gsub("^Q51_3_TEXT$", "AccForIronLoss4B", names(data))
+names(data) <- gsub("^Q53_1$", "DeferralSource1", names(data))
+names(data) <- gsub("^Q53_2$", "DeferralSource2", names(data))
+names(data) <- gsub("^Q53_3$", "DeferralSource3", names(data))
+names(data) <- gsub("^Q53_4$", "DeferralSource4", names(data))
+names(data) <- gsub("^Q53_5$", "DeferralSource5", names(data))
+names(data) <- gsub("^Q88$", "DeferralSource6A", names(data))
+names(data) <- gsub("^Q88_1_TEXT$", "DeferralSource6B", names(data))
+
+names(data) <- gsub("^Q62_1$", "Supplements1", names(data))
+names(data) <- gsub("^Q62_2$", "Supplements2", names(data))
+names(data) <- gsub("^Q62_3$", "Supplements3", names(data))
+names(data) <- gsub("^Q62_4$", "Supplements4", names(data))
+names(data) <- gsub("^Q73_1.0$", "SupplementsUse", names(data))
+names(data) <- gsub("^Q73_2$", "SupplementsUse1A", names(data))
+names(data) <- gsub("^Q73_3$", "SupplementsUse2A", names(data))
+names(data) <- gsub("^Q73_1_TEXT$", "SupplementsUse3A", names(data))
+names(data) <- gsub("^Q73_2_TEXT$", "SupplementsUse1B", names(data))
+names(data) <- gsub("^Q73_3_TEXT$", "SupplementsUse2B", names(data))
+
+names(data) <- gsub("^Q34$", "SupplementsOpen", names(data))
+names(data) <- gsub("^Q34_1_TEXT$", "SupplementsOpen1", names(data))
+names(data) <- gsub("^Q34_2_TEXT$", "SupplementsOpen2", names(data))
+
+names(data) <- gsub("^Q36_1$", "IronSuppKnowledge1", names(data))
+names(data) <- gsub("^Q36_2$", "IronSuppKnowledge2", names(data))
+names(data) <- gsub("^Q36_3$", "IronSuppKnowledge3", names(data))
+names(data) <- gsub("^Q36_4$", "IronSuppKnowledge4", names(data))
+names(data) <- gsub("^Q90_1$", "IronSuppKnowledge1_Certainty", names(data))
+names(data) <- gsub("^Q90_2$", "IronSuppKnowledge2_Certainty", names(data))
+names(data) <- gsub("^Q90_3$", "IronSuppKnowledge3_Certainty", names(data))
+names(data) <- gsub("^Q90_4$", "IronSuppKnowledge4_Certainty", names(data))
+
+names(data) <- gsub("^Q37_1$", "IronSuppSE1", names(data))
+names(data) <- gsub("^Q37_2$", "IronSuppSE2", names(data))
+names(data) <- gsub("^Q37_3$", "IronSuppSE3", names(data))
+names(data) <- gsub("^Q37_4$", "IronSuppSE4", names(data))
+names(data) <- gsub("^Q37_5$", "IronSuppSE5", names(data))
+names(data) <- gsub("^Q37_6$", "IronSuppSE6", names(data))
+names(data) <- gsub("^Q37_7$", "IronSuppSE7", names(data))
+names(data) <- gsub("^Q37_8$", "IronSuppSE8", names(data))
+names(data) <- gsub("^Q37_9$", "IronSuppSE9", names(data))
+
+names(data) <- gsub("^Q38$", "IronSuppUse", names(data))
+names(data) <- gsub("^Q39_1$", "IronSuppEffect1", names(data))
+names(data) <- gsub("^Q39_2$", "IronSuppEffect2", names(data))
+names(data) <- gsub("^Q39_3$", "IronSuppEffect3", names(data))
+names(data) <- gsub("^Q39_4$", "IronSuppEffect4", names(data))
+names(data) <- gsub("^Q39_5$", "IronSuppEffect5", names(data))
+names(data) <- gsub("^Q71$", "IronSuppEffect6A", names(data))
+names(data) <- gsub("^Q71_1_TEXT$", "IronSuppEffect6B", names(data))
+
+names(data) <- gsub("^Q40_1$", "IronSuppSanq1", names(data))
+names(data) <- gsub("^Q40_2$", "IronSuppSanq2", names(data))
+names(data) <- gsub("^Q40_3$", "IronSuppSanq3", names(data))
+names(data) <- gsub("^Q40_4$", "IronSuppSanq4", names(data))
+names(data) <- gsub("^Q40_5$", "IronSuppSanq5", names(data))
+names(data) <- gsub("^Q40_6$", "IronSuppSanq6", names(data))
+names(data) <- gsub("^Q40_7$", "IronSuppSanq7", names(data))
+names(data) <- gsub("^Q40_8$", "IronSuppSanq8", names(data))
+names(data) <- gsub("^Q40_9$", "IronSuppSanq9", names(data))
+
+names(data) <- gsub("^Q41$", "IronSuppSanqReason", names(data))
+names(data) <- gsub("^Q41_3_TEXT$", "IronSuppSanqReasonB", names(data))
+names(data) <- gsub("^Q77_1$", "IronDefPref1", names(data))
+names(data) <- gsub("^Q77_2$", "IronDefPref2", names(data))
+names(data) <- gsub("^Q77_3$", "IronDefPref3", names(data))
+names(data) <- gsub("^Q77_4$", "IronDefPref4", names(data))
+
+names(data) <- gsub("^Q79_1$", "IronSuppSanqCondition1", names(data))
+names(data) <- gsub("^Q79_2$", "IronSuppSanqCondition2", names(data))
+names(data) <- gsub("^Q79_3$", "IronSuppSanqCondition3", names(data))
+names(data) <- gsub("^Q79_4$", "IronSuppSanqCondition4", names(data))
+names(data) <- gsub("^Q79_5$", "IronSuppSanqCondition5", names(data))
+names(data) <- gsub("^Q79_6$", "IronSuppSanqCondition6", names(data))
+
+names(data) <- gsub("^Q81_1$", "IronSuppSanqReason1", names(data))
+names(data) <- gsub("^Q81_2$", "IronSuppSanqReason2", names(data))
+names(data) <- gsub("^Q81_3$", "IronSuppSanqReason3", names(data))
+names(data) <- gsub("^Q81_4$", "IronSuppSanqReason4", names(data))
+names(data) <- gsub("^Q81_5$", "IronSuppSanqReason5", names(data))
+
+column_names <- colnames(data)
+column_names <- as.data.frame(column_names)
+print(column_names)
+```
 
 
 # Translate answers
