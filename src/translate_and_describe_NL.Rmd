@@ -55,7 +55,7 @@ colnames(data)
 # Translate questions
 ```{r}
 # Delete unused variables
-data <- subset(data, select = -c(StartDate, EndDate, Status, Duration__in_seconds_, RecordedDate, ResponseId, DistributionChannel, UserLanguage))
+data <- subset(data, select = -c(StartDate, Progress, Finished, EndDate, Status, Duration__in_seconds_, RecordedDate, ResponseId, DistributionChannel, UserLanguage))
 
 
 names(data) <- gsub("^Q3$", "Age", names(data))
@@ -440,24 +440,10 @@ tmp <- data %>%
   mutate_at(vars(which(str_detect(colnames(data), "Measurement"))), ~ f3(.))%>% 
   mutate_at(vars(which(colnames(data) %in% c("Knowledge1","Knowledge2","Knowledge3","Knowledge4","KnowledgeHb1","KnowledgeHb2","KnowledgeHb3","KnowledgeHb4","KnowledgeFer1","KnowledgeFer2","KnowledgeFer3","KnowledgeFer4","IronSuppKnowledge1","IronSuppKnowledge2","IronSuppKnowledge3","IronSuppKnowledge4"))), ~ f4(.)) %>% 
   mutate_at(vars(which(str_detect(colnames(data), "_Certainty"))), ~ f5(.)) %>% 
-  mutate_at(vars(which(colnames(data) %in% c("AccForIronLoss", "SupplementsUse.NL", "SupplementsOpen"))), ~ f6(.))%>% 
-  mutate_at(vars(which(str_detect(colnames(data), "\\bConsequenceHb1\\b|\\bConsequenceHb2\\b|\\bConsequenceHb3\\b|\\bConsequenceHb4\\b|\\bConsequenceHb5\\b|\\bConsequenceHb6\\b|\\bConsequenceHb7\\b|\\bConsequenceFer1\\b|\\bConsequenceFer2\\b|\\bConsequenceFer3\\b|\\bConsequenceFer4\\b|\\bConsequenceFer5\\b|\\bConsequenceFer6\\b|\\bConsequenceFer7\\b|\\bDeferral\\b|\\bLast_Deferral\\b|\\bDeferralInfo1\\b|\\bDeferralInfo2\\b|\\bDeferralInfo3\\b|\\bDeferralInfo4\\b|\\bDeferralInfo5\\b|\\bLackDeferralInfo1\\b|\\bLackDeferralInfo2\\b|\\bLackDeferralInfo3\\b|\\bLackDeferralInfo4\\b|\\bDeferral_Motivation1\\b|\\bDeferral_Motivation2\\b|\\bSymptomsID1\\b|\\bSymptomsID2\\b|\\bSymptomsID3\\b|\\bSymptomsID4\\b|\\bSymptomsID5\\b|\\bSymptomsID6\\b|\\bSymptomsID7\\b|\\bSymptomsID8\\b|\\bAccForIronLoss1\\b|\\bAccForIronLoss2\\b|\\bAccForIronLoss3\\b|\\bAccForIronLoss4A\\b|\\bDeferralSource1\\b|\\bDeferralSource2.NL\\b|\\bDeferralSource3\\b|\\bDeferralSource4\\b|\\bDeferralSource5\\b|\\bDeferralSource6A\\b|\\bSupplements1\\b|\\bSupplements2\\b|\\bSupplements3\\b|\\bSupplements4\\b|\\bSupplementsUse1A.NL\\b|\\bSupplementsUse2A.NL\\b|\\bSupplementsUse3A.NL\\b|\\bSupplementsReason1\\b|\\bSupplementsReason2\\b|\\bSupplementsReason3\\b|\\bSupplementsReason4\\b|\\bSupplementsReason5\\b|\\bSupplementsReason6A\\b|\\bSupplementsOpen1\\b|\\bSupplementsOpen2\\b|\\bIronSuppKnowledge1\\b|\\bIronSuppKnowledge2\\b|\\bIronSuppKnowledge3\\b|\\bIronSuppKnowledge4\\b|\\bIronSuppSE1\\b|\\bIronSuppSE2\\b|\\bIronSuppSE3\\b|\\bIronSuppSE4\\b|\\bIronSuppSE5\\b|\\bIronSuppSE6\\b|\\bIronSuppSE7.NL\\b|\\bIronSuppSE8\\b|\\bIronSuppSE9\\b|\\bIronSuppEffect1\\b|\\bIronSuppEffect2\\b|\\bIronSuppEffect3\\b|\\bIronSuppEffect4\\b|\\bIronSuppEffect5\\b|\\bIronSuppEffect6A\\b"))), ~ f7(.)) %>% 
+  mutate_at(vars(which(colnames(data) %in% c("AccForIronLoss", "SupplementsUse.NL", "SupplementsOpen", "SupplementsReason6A"))), ~ f6(.))%>% 
+  mutate_at(vars(which(str_detect(colnames(data), "\\bConsequenceHb1\\b|\\bConsequenceHb2\\b|\\bConsequenceHb3\\b|\\bConsequenceHb4\\b|\\bConsequenceHb5\\b|\\bConsequenceHb6\\b|\\bConsequenceHb7\\b|\\bConsequenceFer1\\b|\\bConsequenceFer2\\b|\\bConsequenceFer3\\b|\\bConsequenceFer4\\b|\\bConsequenceFer5\\b|\\bConsequenceFer6\\b|\\bConsequenceFer7\\b|\\bSymptomsID1\\b|\\bSymptomsID2\\b|\\bSymptomsID3\\b|\\bSymptomsID4\\b|\\bSymptomsID5\\b|\\bSymptomsID6\\b|\\bSymptomsID7\\b|\\bSymptomsID8\\b|\\bSymptomsID9\\b|\\bAccForIronLoss1\\b|\\bAccForIronLoss2\\b|\\bAccForIronLoss3\\b|\\bAccForIronLoss4A\\b|\\bDeferralSource1\\b|\\bDeferralSource2.NL\\b|\\bDeferralSource3\\b|\\bDeferralSource4\\b|\\bDeferralSource5\\b|\\bDeferralSource6A\\b|\\bSupplementsUse1A.NL\\b|\\bSupplementsUse2A.NL\\b|\\bSupplementsUse3A.NL\\b|\\bSupplementsReason1\\b|\\bSupplementsReason2\\b|\\bSupplementsReason3\\b|\\bSupplementsReason4\\b|\\bSupplementsReason5\\b|\\bIronSuppKnowledge1\\b|\\bIronSuppKnowledge2\\b|\\bIronSuppKnowledge3\\b|\\bIronSuppKnowledge4\\b|\\bIronSuppSE1\\b|\\bIronSuppSE2\\b|\\bIronSuppSE3\\b|\\bIronSuppSE4\\b|\\bIronSuppSE5\\b|\\bIronSuppSE6\\b|\\bIronSuppSE7.NL\\b|\\bIronSuppSE8\\b|\\bIronSuppSE9\\b|\\bIronSuppEffect1\\b|\\bIronSuppEffect2\\b|\\bIronSuppEffect3\\b|\\bIronSuppEffect4\\b|\\bIronSuppEffect5\\b|\\bIronSuppEffect6A\\b"))), ~ f7(.)) %>% 
   mutate_at(vars(which(colnames(data) %in% c("IronSuppSanqCondition1", "IronSuppSanqCondition2", "IronSuppSanqCondition3", "IronSuppSanqCondition4", "IronSuppSanqCondition5", "IronSuppSanqCondition6"))), ~ f9(.)) %>%
-  mutate_at(vars(which(str_detect(colnames(data), "\\bSymptoms1_Severity\\b|\\bSymptoms2_Severity\\b|\\bSymptoms3_Severity\\b|\\bSymptoms4_Severity\\b|\\bSymptoms5_Severity\\b|\\bSymptoms6_Severity\\b|\\bSymptoms7_Severity\\b|\\bSymptoms8_Severity\\b|\\bSymptoms9_Severity\\b|\\bSymptoms10_Severity\\b|\\bDeferral\\b|\\bLast_Deferral\\b|\\bDeferralInfo1\\b|\\bDeferralInfo2\\b|\\bDeferralInfo3\\b|\\bDeferralInfo4\\b|\\bDeferralInfo5\\b|\\bLackDeferralInfoTEXT\\b|\\bDeferral_Motivation1\\b|\\bDeferral_Motivation2\\b|\\bAccForIronLoss4B\\b|\\bDeferralSource6B\\b|\\bSupplements1\\b|\\bSupplements2\\b|\\bSupplements3\\b|\\bSupplements4\\b|\\bSupplementsUse1B.NL\\b|\\bSupplementsUse2B.NL\\b|\\bSupplementsUse3B.NL\\b|\\bSupplementsReason6A\\b|\\bSupplementsReason6B.NL\\b|\\bSupplementsOpen1\\b|\\bSupplementsOpen2\\b|\\bIronSuppEffect6B\\b|\\bIronSuppSanqReason\\b|\\bIronSuppSanqReasonB.NL\\b|\\bIronDefPref1\\b|\\bIronDefPref2\\b|\\bIronDefPref3\\b|\\bIronDefPref4\\b|\\bIronSuppSanqReason1\\b|\\bIronSuppSanqReason2\\b|\\bIronSuppSanqReason3\\b|\\bIronSuppSanqReason4\\b|\\bIronSuppSanqReason5\\b"))), ~ f11(.))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  mutate_at(vars(which(str_detect(colnames(data), "\\bSymptoms1_Severity\\b|\\bSymptoms2_Severity\\b|\\bSymptoms3_Severity\\b|\\bSymptoms4_Severity\\b|\\bSymptoms5_Severity\\b|\\bSymptoms6_Severity\\b|\\bSymptoms7_Severity\\b|\\bSymptoms8_Severity\\b|\\bSymptoms9_Severity\\b|\\bSymptoms10_Severity\\b|\\bDeferral\\b|\\bLast_Deferral\\b|\\bDeferralInfo1\\b|\\bDeferralInfo2\\b|\\bDeferralInfo3\\b|\\bDeferralInfo4\\b|\\bDeferralInfo5\\b|\\bLackDeferralInfoTEXT\\b|\\bDeferral_Motivation1\\b|\\bDeferral_Motivation2\\b|\\bDeferralSource6B\\b|\\bSupplements1\\b|\\bSupplements2\\b|\\bSupplements3\\b|\\bSupplements4\\b|\\bIronSuppSanqReason\\b|\\bIronSuppSanqReasonB.NL\\b|\\bIronDefPref1\\b|\\bIronDefPref2\\b|\\bIronDefPref3\\b|\\bIronDefPref4\\b|\\bIronSuppSanqReason1\\b|\\bIronSuppSanqReason2\\b|\\bIronSuppSanqReason3\\b|\\bIronSuppSanqReason4\\b|\\bIronSuppSanqReason5\\b|\\bDeferral_Motivation1\\b|\\bDeferral_Motivation2\\b"))), ~ f11(.))
 
 
 
@@ -572,11 +558,19 @@ SupplementsUse.NL =
   ),
 IronSuppUse =
   fct_recode(IronSuppUse,
-             "No, I have never taken iron (containing) supplements " = "5",
+             "No, I have never taken iron (containing) supplements" = "5",
              "Yes, I am currently taking iron supplements ordered to me by a doctor"    = "1",
              "Yes, I am currently taking iron supplements from a drugstore"   =  "2", 
-             "Yes, I take multivitamins that contain iron "  =  "3",
-             "I have taken iron supplements/multivitamins before, but not anymore "      = "4" 
+             "Yes, I take multivitamins that contain iron"  =  "3",
+             "I have taken iron supplements/multivitamins before, but not anymore"      = "4" 
+             
+  ),
+IronSuppSanqReason =
+  fct_recode(IronSuppSanqReason,
+             "To improve my health" = "1",
+             "To be able to continue to donate"    = "2",
+             "Different reason"   =  "3", 
+             "I would never make use of iron supplements provided by the blood service"  =  "4"
              
   ),
 
@@ -592,32 +586,32 @@ IronSuppUse =
 ## 3: something_in_some_language
 
 ```{r}
-tmp %>% count(`3: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+tmp %>% count(Menstruation) %>% arrange(desc(n)) %>% print( n = 1e3)
 ```
 
 
 ```{r}
 
 
-tmp <- tmp %>%  
-  mutate(
-    `something_in_some_language` = str_remove_all(`something_in_some_language`,"\""), # there we some extra '\' that needed to be removed
-  `3: something_in_some_language` = fct_recode(`3: something_in_some_language`,
- "No, other" =              "something_in_some_language",
- "No, other" =              "something_in_some_language",
- #... maybe some other alternative open text answers
-  "No, due to menopause" =  "something_in_some_language",
-# ...
-   "No, due to current contraception use"  =           "something_in_some_language",
-#... 
-  "No, due to hysterectomy" =             "something_in_some_language",
-"No, due to menopause"    =           "something_in_some_language",
-  "No, other" =             "something_in_some_language",
-
-)
-)
-
-tmp %>% count(`3: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+# tmp <- tmp %>%  
+#   mutate(
+#     `something_in_some_language` = str_remove_all(`something_in_some_language`,"\""), # there we some extra '\' that needed to be removed
+#   `3: something_in_some_language` = fct_recode(`3: something_in_some_language`,
+#  "No, other" =              "something_in_some_language",
+#  "No, other" =              "something_in_some_language",
+#  #... maybe some other alternative open text answers
+#   "No, due to menopause" =  "something_in_some_language",
+# # ...
+#    "No, due to current contraception use"  =           "something_in_some_language",
+# #... 
+#   "No, due to hysterectomy" =             "something_in_some_language",
+# "No, due to menopause"    =           "something_in_some_language",
+#   "No, other" =             "something_in_some_language",
+# 
+# )
+# )
+# 
+# tmp %>% count(`3: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
 
 
 ```
@@ -627,33 +621,49 @@ tmp %>% count(`3: something_in_some_language`) %>% arrange(desc(n)) %>% print( n
 
 
 ```{r}
-tmp %>% count(`5: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+tmp %>% count(Education) %>% arrange(desc(n)) %>% print( n = 1e3)
 
 
 ```
 
 ```{r}
-tmp <- tmp %>% mutate(
-  `5: something_in_some_language` =fct_recode(`5: something_in_some_language`,
- "High school" = "something_in_some_language",
-# ... maybe some other alternatives
- "Primary school" = "something_in_some_language",
-"High school" ="something_in_some_language",
-"College" ="something_in_some_language",
-"University" = "something_in_some_language"
-),
- `5: something_in_some_language` = fct_relevel(
-    `5: something_in_some_language`,
-    "Primary school",
-    "High school",
-    "College",
-    "University"
-  ),
-  `5: something_in_some_language` = as.ordered(
-    `5: something_in_some_language`)
-)
+#tmp1 <- tmp
+#tmp <- tmp1
 
-tmp %>% count(`5: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+# EDUCATION
+tmp$Education_other.NL <- as.character(tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("HBO", tmp$Education_other.NL), "5", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("Hbo",tmp$Education_other.NL), "5", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("LEAO", tmp$Education_other.NL), "5", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("HBS", tmp$Education_other.NL), "5", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("Mafo",tmp$Education_other.NL), "4", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("Z opleiding",tmp$Education_other.NL), "4", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("MAVO",tmp$Education_other.NL), "4", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("Mavo",tmp$Education_other.NL), "4", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("PhD",tmp$Education_other.NL), "6", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("Post",tmp$Education_other.NL), "6", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("post",tmp$Education_other.NL), "6", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("Master",tmp$Education_other.NL), "6", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("Lts",tmp$Education_other.NL), "4", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("Huishoudschool",tmp$Education_other.NL), "3", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("HAVO",tmp$Education_other.NL), "3", tmp$Education_other.NL)
+tmp$Education_other.NL <- ifelse(grepl("Niet relevant",tmp$Education_other.NL), " ", tmp$Education_other.NL)
+
+tmp <- tmp  %>%
+  mutate(Education = case_when(
+    Education == "None" ~ "None",
+    Education == "Primary school" ~ "Primary school", # Basisschool
+    Education == "High school" ~ "High school", # Middelbare school
+    Education == "College" ~ "College", # MAVO
+    Education == "Applied sciences" ~ "Applied sciences", # HBO
+    Education == "University" ~ "University", # Universiteit
+    Education == "Other" & (Education_other.NL == "3") ~ "High school",
+    Education == "Other" & (Education_other.NL == "4") ~ "College",
+    Education == "Other" & (Education_other.NL == "5") ~ "Applied sciences",
+    Education == "Other" & (Education_other.NL == "6") ~ "University"
+)) 
+
+tmp %>% count(Education) %>% arrange(desc(n)) %>% print( n = 1e3)
 ```
 
 
@@ -661,32 +671,32 @@ tmp %>% count(`5: something_in_some_language`) %>% arrange(desc(n)) %>% print( n
 
 
 ```{r}
-tmp %>% count(`24: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+#tmp %>% count(`24: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
 ```
 
 
 
 
 ```{r}
-tmp <- tmp %>% mutate(
-`24: something_in_some_language` = 
-  fct_recode(`24: something_in_some_language`,
-    "Other"= "something_in_some_language", 
-    "Iron stores/ferritin" = "something_in_some_language", 
-    "Other" = "something_in_some_language", 
-    "Information on the consequences of low hemoglobin levels" = "something_in_some_language", 
-    "Information on how to restore hemoglobin levels" = "something_in_some_language", 
-    "Information on what hemoglobin is" = "something_in_some_language", 
-   "No information was missing" =  "something_in_some_language" 
-
-  ),
-)
+# tmp <- tmp %>% mutate(
+# `24: something_in_some_language` = 
+#   fct_recode(`24: something_in_some_language`,
+#     "Other"= "something_in_some_language", 
+#     "Iron stores/ferritin" = "something_in_some_language", 
+#     "Other" = "something_in_some_language", 
+#     "Information on the consequences of low hemoglobin levels" = "something_in_some_language", 
+#     "Information on how to restore hemoglobin levels" = "something_in_some_language", 
+#     "Information on what hemoglobin is" = "something_in_some_language", 
+#    "No information was missing" =  "something_in_some_language" 
+# 
+#   ),
+# )
 
 ```
 
 
 ```{r}
-tmp %>% count(`24: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+#tmp %>% count(`24: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
 ```
 
 
@@ -694,28 +704,28 @@ tmp %>% count(`24: something_in_some_language`) %>% arrange(desc(n)) %>% print( 
 
 
 ```{r}
-tmp %>% count(`36: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+# tmp %>% count(`36: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
 ```
 
 
 
 ```{r}
-tmp <- tmp %>% mutate(
-  `36: something_in_some_language` =
-    case_when(
-      !is.na(`36: something_in_some_language`) & 
-        `36: something_in_some_language` != "No" ~ "Other",
-      TRUE ~ `36: something_in_some_language`
-          ),        
-   `36: something_in_some_language` = 
-    as_factor(`36: something_in_some_language`)    
-
-)
+# tmp <- tmp %>% mutate(
+#   `36: something_in_some_language` =
+#     case_when(
+#       !is.na(`36: something_in_some_language`) & 
+#         `36: something_in_some_language` != "No" ~ "Other",
+#       TRUE ~ `36: something_in_some_language`
+#           ),        
+#    `36: something_in_some_language` = 
+#     as_factor(`36: something_in_some_language`)    
+# 
+# )
 ```
 
 
 ```{r}
-tmp %>% count(`36: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+# tmp %>% count(`36: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
 ```
 
 
@@ -723,60 +733,36 @@ tmp %>% count(`36: something_in_some_language`) %>% arrange(desc(n)) %>% print( 
 
 
 ```{r}
-tmp %>% count(`44: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+#tmp %>% count(`44: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
 
 ```
 
 
 ```{r}
-tmp <- tmp %>% mutate(
-  `44: something_in_some_language` =
-    case_when(
-      !is.na(`44: something_in_some_language`) & 
-        `44: something_in_some_language` != "No" ~ "Other",
-      TRUE ~ `44: something_in_some_language`
-          ),        
-   `44: something_in_some_language` = 
-    as_factor(`44: something_in_some_language`)
-)
+# tmp <- tmp %>% mutate(
+#   `44: something_in_some_language` =
+#     case_when(
+#       !is.na(`44: something_in_some_language`) & 
+#         `44: something_in_some_language` != "No" ~ "Other",
+#       TRUE ~ `44: something_in_some_language`
+#           ),        
+#    `44: something_in_some_language` = 
+#     as_factor(`44: something_in_some_language`)
+# )
 ```
 
 
 ```{r}
-tmp %>% count(`44: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+# tmp %>% count(`44: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
 ```
 
 ## 46: Mikä on sinulle tärkein syy ottaa vastaan Veripalvelun tarjoama rautalisä?
 
 
 ```{r}
-tmp %>% count(`46: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+ tmp %>% count(IronSuppSanqReason) %>% arrange(desc(n)) %>% print( n = 1e3)
 ```
 
-
-```{r}
-tmp <- tmp %>% mutate(
-  `46: something_in_some_language` =
-    fct_recode(`46: something_in_some_language`,
-               "To improve my health" = "something_in_some_language",
-               # ... maybe some alternative ansers
-               "To be able to donate without delays" = "something_in_some_language",
-               "I would never take them" = "something_in_some_language" ,
-               "To improve my health" = "something_in_some_language",
-               "Other" = "something_in_some_language",
-               "Other" = "something_in_some_language",
-               "To recover from donation" = "something_in_some_language"
-    )
-)
-
-
-```
-
-
-
-```{r}
-tmp %>% count(`46: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
-```
 
 
 ## Removed open texts
@@ -784,23 +770,16 @@ tmp %>% count(`46: something_in_some_language`) %>% arrange(desc(n)) %>% print( 
 ### 37.1: Voisitko harkita ravintolisien käyttöä?: Kyllä, koska
 
 ```{r}
-tmp %>% count(`37.1: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+#tmp %>% count(`37.1: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
 ```
 
 
 ### 37.2: Voisitko harkita ravintolisien käyttöä?: En, koska
 
 ```{r}
-tmp %>% count(`37.2: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+#tmp %>% count(`37.2: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
  
 ```
-
-
-```{r}
-
-```
-
-
 
 
 ```{r}
@@ -808,56 +787,50 @@ summary(tmp)
 ```
 
 
-
-
-## Translate questions
-
 ```{r}
+#cut age for summarisation
 
-questions <- read_excel("../data/Tulokset - Donor Perception Survey question translations (ID 125823).xlsx")
-questions <- questions %>% 
-  mutate(
-    QuestionWNo = str_c(str_extract(Kysymys, "^.*\\d+\\:")," ",Question) %>% str_replace("\\.0\\:",":") %>% 
-      str_replace("\\.$","") %>% str_replace_all("\\.\\:",":") 
-  )
-
+tmp$Age <- as.numeric((as.character(tmp$Age)))
+tmp$Age <- cut(tmp$Age,breaks=c(min(tmp$Age),seq(from=20,to=75,by=10),max(tmp$Age)),include.lowest = TRUE)
+tmp$Age <- factor(tmp$Age,ordered = TRUE)
 
 ```
 
 
-```{r}
-data <- tmp %>% select(-`Päivämäärä`)
-colnames(data) <- questions$QuestionWNo
-
-#Remove 37.1 and 37.2
-data <- data %>% 
-  select(-(which(str_detect(colnames(data) ,"^37\\.\\d"))))
-
-save(data,file="../results/donorironpercep.rdata")
-```
 
 ```{r}
-
-colclasses <- data %>% ungroup %>% summarise(across(everything(), ~ class(.x))) %>% t() %>% as_tibble(rownames="col")
-
-colclasses %>% count(V1)
+#Export summary count data
+DataExport <- apply(tmp,MARGIN = 2,FUN = table)
+saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - NL.RDS")
 
 ```
-
-
 
 
 # Summarise 
 
-
 ```{r}
-dfSummary(data,
+Summary_NL <- dfSummary(tmp,
           plain.ascii = FALSE, 
           style = "grid", 
           graph.col = TRUE,
           graph.magnif = 0.75, 
           valid.col = FALSE, 
           tmp.img.dir = "/tmp")
+
+
+
+
+```
+
+
+
+# Save dataset
+```{r}
+
+
+datanl <- saveRDS("../data/countfi.RDS")
+
+
 
 
 ```
