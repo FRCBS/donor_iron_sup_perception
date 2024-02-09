@@ -21,6 +21,7 @@ knitr::opts_chunk$set(
 )
 library(tidyverse)
 library(readxl)
+library(here)
 
 ```
 
@@ -28,10 +29,12 @@ library(readxl)
 
 ```{r}
 # Read in each countries data
-datafi <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - FIN.RDS")
-datanl <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - NL.RDS")
+#datafi <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - FIN.RDS")
+#datanl <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - NL.RDS")
 #datafr <- readRDS("../data/countfi.RDS")
-
+datafi <- readRDS(here("data/countfi.RDS"))
+datanl <- readRDS(here("data/countfi.RDS"))
+datafr <- readRDS(here("data/countfi.RDS"))
 
 # Create dataset with all the names 
 vars_datafi <- names(datafi)
@@ -47,7 +50,8 @@ datanl_common <- datanl[common_vars]
 
 
 # #filter the question metadata to what all have in common
-questions <- read_excel("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/DPS Variable Overview.xlsx")
+#questions <- read_excel("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/DPS Variable Overview.xlsx")
+questions <- read_excel(here("data/Kopio_DPS Variable Overview.xlsx"))
 questions <- questions %>% inner_join(
   tibble(variablesfi=names(datafi_common)),
          by=c("Variable name"= "variablesfi")
