@@ -68,7 +68,7 @@ names(data) <- gsub("^Q12$", "Education", names(data))
 names(data) <- gsub("^Q12_7_TEXT$", "Education_other.NL", names(data))
 names(data) <- gsub("^Q13$", "Health", names(data))
 names(data) <- gsub("^Q15$", "Diet", names(data))
-names(data) <- gsub("^Q16$", "Number_donation", names(data))
+names(data) <- gsub("^Q16$", "Number_donation", names(data)) 
 names(data) <- gsub("^Q74$", "Last_donation", names(data))
 names(data) <- gsub("^Q92$", "Location_donation.NL", names(data))
 
@@ -828,7 +828,7 @@ Summary_NL <- dfSummary(tmp,
 ```{r}
 
 
-datanl <- saveRDS("../data/countfi.RDS")
+#datanl <- saveRDS("../data/countfi.RDS")
 
 
 
