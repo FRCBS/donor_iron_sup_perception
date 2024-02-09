@@ -28,28 +28,41 @@ library(readxl)
 
 ```{r}
 # Read in each countries data
-datafi <- readRDS("../data/countfi.RDS")
-datanl <- readRDS("../data/countfi.RDS")
-datafr <- readRDS("../data/countfi.RDS")
+datafi <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - FIN.RDS")
+datanl <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - NL.RDS")
+#datafr <- readRDS("../data/countfi.RDS")
 
 
-#filter the question metadata to what all have in common
-questions <- read_excel("../data/Kopio_DPS Variable Overview.xlsx")
-questions <- questions %>% inner_join( 
-  tibble(variablesfi=names(datafi)),
+# Create dataset with all the names 
+vars_datafi <- names(datafi)
+vars_datanl <- names(datanl)
+
+# Compare common variables
+common_vars <- intersect(vars_datafi, vars_datanl)
+
+# Select common variables
+datafi_common <- datafi[common_vars]
+datanl_common <- datanl[common_vars]
+
+
+
+# #filter the question metadata to what all have in common
+questions <- read_excel("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/DPS Variable Overview.xlsx")
+questions <- questions %>% inner_join(
+  tibble(variablesfi=names(datafi_common)),
          by=c("Variable name"= "variablesfi")
          )
-                         
 
-questions <- questions %>% inner_join( 
-  tibble(variablesnl=names(datanl)),
+
+questions <- questions %>% inner_join(
+  tibble(variablesnl=names(datanl_common)),
          by=c("Variable name"= "variablesnl")
          )
 
 
 
 
-questions <- questions %>% inner_join( 
+questions <- questions %>% inner_join(
   # [1:30] is just an example
   tibble(variablesfr=names(datafr)[1:30]),
          by=c("Variable name"= "variablesfr")
@@ -100,10 +113,9 @@ maketable <- function(subset,country) {
 
 #Make joint data
 qdata <- bind_rows(
-  maketable(datafi[q],country="FI"), 
-  maketable(datanl[q],country="NL"),
-    maketable(datafr[q],country="FR")
-  )
+  maketable(datafi_common[q], country = "FI"), 
+  maketable(datanl_common[q], country = "NL")
+)
 head(qdata)
 ```
 
@@ -153,9 +165,8 @@ qdata %>%
 q <- questions %>% filter(Category == "Donor experience") %>% select('Variable name') %>% unlist() %>% as.vector()
 qdata <- bind_rows(
   maketable(datafi[q],country="FI"), 
-  maketable(datanl[q],country="NL"),
-    maketable(datafr[q],country="FR")
-  ) %>%  pivot_longer(
+  maketable(datanl[q],country="NL")) %>%  
+  pivot_longer(
      cols = -c(Variable,Country) ,
     names_to = "answer",
     values_to = "count"
