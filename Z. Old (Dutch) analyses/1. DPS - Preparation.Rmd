@@ -1,0 +1,747 @@
+---
+title: "Donor Perception Survey - Data preparation"
+author: "Jan Karregat"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+Sys.setlocale("LC_MESSAGES", 'en_GB.UTF-8')
+Sys.setenv(LANG = "en_US.UTF-8")
+# echo "rmarkdown::render('ferritin_stats_FIN.Rmd', clean=TRUE,output_format='pdf_document',output_file='../results/ferritin_stats_FIN.pdf')" | R --slave
+knitr::opts_chunk$set(
+        echo = TRUE,
+        message = FALSE,
+        warning = FALSE
+)
+
+currentDate <- format(Sys.time(), "%Y-%m-%d")
+FolderName <- paste("L:/DonorMedicin/FORTE/B Donor Perception Survey/B Analysis/R/3. Plots/", currentDate,sep="")
+dir.create(FolderName)
+
+
+# library("factoextra")
+# library("FactoMineR")
+library(plyr)
+library(ggsci)
+library(nFactors)
+library(psych)
+library(corrplot)
+library(psych)
+library(ggplot2)
+library(car)
+library(tidyverse)
+library(ggthemes)
+library(haven)
+library(rsample)
+library(broom)
+library(scales)
+library(kableExtra)
+library(boot)
+library(tableone)
+library(naniar)
+library(haven)
+library(foreign)
+#library(mice)
+library(tidyverse)
+library(tableone)
+library(stargazer)
+library(gridExtra)
+library(cowplot)
+library(broom)
+library(GGally)
+library(ggfortify)
+library(knitr)
+library(lubridate)
+library(car)
+library(sfsmisc)
+library(MASS)
+library(ordinal)
+library(sjmisc)
+library(VIM)
+library(epiDisplay)
+library(epitools)
+library(ez)
+library(ggbeeswarm)
+library(ggthemes)
+library(rsample)
+library(broom)
+library(scales)
+library(kableExtra)
+library(boot)
+library(readxl)
+library(foreign)
+library(corrr)
+library(ggcorrplot)
+library(tidylog, warn.conflicts = F)
+```
+
+## Open Donor Perception Survey 
+```{r}
+# Open SPSS dataset with survey data
+Perception_Survey_Working_File <- read_sav("L:/DonorMedicin/FORTE/B Donor Perception Survey/A Source documents/Donor Perceptie IJzersupplementen.sav")
+
+Data <- Perception_Survey_Working_File
+```
+
+
+# Adjust variable names
+```{r}
+# Participants must have completed at least 75% of the survey
+Data <- Data[Data$Progress > 75, ]
+
+# Delete unused variables
+Data <- subset(Data, select = -c(StartDate, EndDate, Status, Duration__in_seconds_, RecordedDate, ResponseId, DistributionChannel, UserLanguage))
+
+# Adjust variable names
+names(Data) <- gsub("^Q3$", "Age", names(Data))
+names(Data) <- gsub("^Q8$", "Sex", names(Data))
+names(Data) <- gsub("^Q8_4_TEXT$", "Sex_other", names(Data))
+names(Data) <- gsub("^Q9$", "Menstruation", names(Data))
+names(Data) <- gsub("^Q9_5_TEXT$", "Menstruation_other", names(Data))
+names(Data) <- gsub("^Q11$", "Area", names(Data))
+names(Data) <- gsub("^Q12$", "Education", names(Data))
+names(Data) <- gsub("^Q12_7_TEXT$", "Education_other", names(Data))
+names(Data) <- gsub("^Q13$", "Health", names(Data))
+names(Data) <- gsub("^Q15$", "Diet", names(Data))
+names(Data) <- gsub("^Q16$", "Number_donation", names(Data))
+names(Data) <- gsub("^Q74$", "Last_donation", names(Data))
+names(Data) <- gsub("^Q92$", "Location_donation", names(Data))
+
+names(Data) <- gsub("^Q45_1$", "OpinionSanq1", names(Data))
+names(Data) <- gsub("^Q45_2$", "OpinionSanq2", names(Data))
+names(Data) <- gsub("^Q45_3$", "OpinionSanq3", names(Data))
+names(Data) <- gsub("^Q45_4$", "OpinionSanq4", names(Data))
+names(Data) <- gsub("^Q45_5$", "OpinionSanq5", names(Data))
+names(Data) <- gsub("^Q45_6$", "OpinionSanq6", names(Data))
+names(Data) <- gsub("^Q45_7$", "OpinionSanq7", names(Data))
+names(Data) <- gsub("^Q45_8$", "OpinionSanq8", names(Data))
+
+names(Data) <- gsub("^Q19_1$", "Symptoms1", names(Data))
+names(Data) <- gsub("^Q19_2$", "Symptoms2", names(Data))
+names(Data) <- gsub("^Q19_3$", "Symptoms3", names(Data))
+names(Data) <- gsub("^Q19_4$", "Symptoms4", names(Data))
+names(Data) <- gsub("^Q19_5$", "Symptoms5", names(Data))
+names(Data) <- gsub("^Q19_6$", "Symptoms6", names(Data))
+
+names(Data) <- gsub("^Q82_1$", "Symptoms1_Intensity", names(Data))
+names(Data) <- gsub("^Q82_2$", "Symptoms2_Intensity", names(Data))
+names(Data) <- gsub("^Q82_3$", "Symptoms3_Intensity", names(Data))
+names(Data) <- gsub("^Q82_4$", "Symptoms4_Intensity", names(Data))
+names(Data) <- gsub("^Q82_5$", "Symptoms5_Intensity", names(Data))
+names(Data) <- gsub("^Q82_6$", "Symptoms6_Intensity", names(Data))
+
+names(Data) <- gsub("^Q21_1$", "Knowledge1", names(Data))
+names(Data) <- gsub("^Q21_2$", "Knowledge2", names(Data))
+names(Data) <- gsub("^Q21_3$", "Knowledge3", names(Data))
+names(Data) <- gsub("^Q21_4$", "Knowledge4", names(Data))
+
+names(Data) <- gsub("^Q83_1$", "Knowledge1_Certainty", names(Data))
+names(Data) <- gsub("^Q83_2$", "Knowledge2_Certainty", names(Data))
+names(Data) <- gsub("^Q83_3$", "Knowledge3_Certainty", names(Data))
+names(Data) <- gsub("^Q83_4$", "Knowledge4_Certainty", names(Data))
+
+names(Data) <- gsub("^Q22_1$", "KnowledgeHb1", names(Data))
+names(Data) <- gsub("^Q22_2$", "KnowledgeHb2", names(Data))
+names(Data) <- gsub("^Q22_3$", "KnowledgeHb3", names(Data))
+names(Data) <- gsub("^Q22_4$", "KnowledgeHb4", names(Data))
+names(Data) <- gsub("^Q84_1$", "KnowledgeHb1_Certainty", names(Data))
+names(Data) <- gsub("^Q84_2$", "KnowledgeHb2_Certainty", names(Data))
+names(Data) <- gsub("^Q84_3$", "KnowledgeHb3_Certainty", names(Data))
+names(Data) <- gsub("^Q84_4$", "KnowledgeHb4_Certainty", names(Data))
+
+names(Data) <- gsub("^Q51_1$", "KnowledgeFer1", names(Data))
+names(Data) <- gsub("^Q51_2$", "KnowledgeFer2", names(Data))
+names(Data) <- gsub("^Q51_3$", "KnowledgeFer3", names(Data))
+names(Data) <- gsub("^Q51_4$", "KnowledgeFer4", names(Data))
+names(Data) <- gsub("^Q85_1$", "KnowledgeFer1_Certainty", names(Data))
+names(Data) <- gsub("^Q85_2$", "KnowledgeFer2_Certainty", names(Data))
+names(Data) <- gsub("^Q85_3$", "KnowledgeFer3_Certainty", names(Data))
+names(Data) <- gsub("^Q85_4$", "KnowledgeFer4_Certainty", names(Data))
+
+names(Data) <- gsub("^Q55_1$", "Measurement1", names(Data))
+names(Data) <- gsub("^Q55_2$", "Measurement2", names(Data))
+names(Data) <- gsub("^Q55_3$", "Measurement3", names(Data))
+names(Data) <- gsub("^Q55_4$", "Measurement4", names(Data))
+names(Data) <- gsub("^Q55_5$", "Measurement5", names(Data))
+
+names(Data) <- gsub("^Q57_1$", "ConsequenceHb1", names(Data))
+names(Data) <- gsub("^Q57_2$", "ConsequenceHb2", names(Data))
+names(Data) <- gsub("^Q57_3$", "ConsequenceHb3", names(Data))
+names(Data) <- gsub("^Q57_4$", "ConsequenceHb4", names(Data))
+names(Data) <- gsub("^Q57_5$", "ConsequenceHb5", names(Data))
+names(Data) <- gsub("^Q57_6$", "ConsequenceHb6", names(Data))
+names(Data) <- gsub("^Q57_7$", "ConsequenceHb7", names(Data))
+
+names(Data) <- gsub("^Q59_1$", "ConsequenceFer1", names(Data))
+names(Data) <- gsub("^Q59_2$", "ConsequenceFer2", names(Data))
+names(Data) <- gsub("^Q59_3$", "ConsequenceFer3", names(Data))
+names(Data) <- gsub("^Q59_4$", "ConsequenceFer4", names(Data))
+names(Data) <- gsub("^Q59_5$", "ConsequenceFer5", names(Data))
+names(Data) <- gsub("^Q59_6$", "ConsequenceFer6", names(Data))
+names(Data) <- gsub("^Q59_7$", "ConsequenceFer7", names(Data))
+
+names(Data) <- gsub("^Q62$", "Deferral", names(Data))
+names(Data) <- gsub("^Q76$", "Last_Deferral", names(Data))
+names(Data) <- gsub("^Q64_1$", "DeferralInfo1", names(Data))
+names(Data) <- gsub("^Q64_2$", "DeferralInfo2", names(Data))
+names(Data) <- gsub("^Q64_3$", "DeferralInfo3", names(Data))
+names(Data) <- gsub("^Q64_4$", "DeferralInfo4", names(Data))
+names(Data) <- gsub("^Q64_5$", "DeferralInfo5", names(Data))
+names(Data) <- gsub("^Q69_1$", "LackDeferralInfo1", names(Data))
+names(Data) <- gsub("^Q69_2$", "LackDeferralInfo2", names(Data))
+names(Data) <- gsub("^Q69_3$", "LackDeferralInfo3", names(Data))
+names(Data) <- gsub("^Q69_4$", "LackDeferralInfo4", names(Data))
+names(Data) <- gsub("^Q69_4_TEXT$", "LackDeferralInfoTEXT", names(Data))
+
+names(Data) <- gsub("^Q71_1$", "Deferral_Motivation1", names(Data))
+names(Data) <- gsub("^Q73_1$", "Deferral_Motivation2", names(Data))
+names(Data) <- gsub("^Q42_1$", "SymptomsIron1", names(Data))
+names(Data) <- gsub("^Q42_2$", "SymptomsIron2", names(Data))
+names(Data) <- gsub("^Q42_3$", "SymptomsIron3", names(Data))
+names(Data) <- gsub("^Q42_4$", "SymptomsIron4", names(Data))
+names(Data) <- gsub("^Q42_5$", "SymptomsIron5", names(Data))
+names(Data) <- gsub("^Q42_6$", "SymptomsIron6", names(Data))
+names(Data) <- gsub("^Q42_7$", "SymptomsIron7", names(Data))
+names(Data) <- gsub("^Q42_8$", "SymptomsIron8", names(Data))
+names(Data) <- gsub("^Q42_9$", "SymptomsIron9", names(Data))
+
+names(Data) <- gsub("^Q49$", "AccForIronLoss", names(Data))
+names(Data) <- gsub("^Q51_1.0$", "AccForIronLoss1", names(Data))
+names(Data) <- gsub("^Q51_4.0$", "AccForIronLoss2", names(Data))
+names(Data) <- gsub("^Q51_2.0$", "AccForIronLoss3", names(Data))
+names(Data) <- gsub("^Q51_3.0$", "AccForIronLoss4A", names(Data))
+names(Data) <- gsub("^Q51_3_TEXT$", "AccForIronLoss4B", names(Data))
+names(Data) <- gsub("^Q53_1$", "DeferralSource1", names(Data))
+names(Data) <- gsub("^Q53_2$", "DeferralSource2", names(Data))
+names(Data) <- gsub("^Q53_3$", "DeferralSource3", names(Data))
+names(Data) <- gsub("^Q53_4$", "DeferralSource4", names(Data))
+names(Data) <- gsub("^Q53_5$", "DeferralSource5", names(Data))
+names(Data) <- gsub("^Q88$", "DeferralSource6A", names(Data))
+names(Data) <- gsub("^Q88_1_TEXT$", "DeferralSource6B", names(Data))
+
+names(Data) <- gsub("^Q62_1$", "Supplements1", names(Data))
+names(Data) <- gsub("^Q62_2$", "Supplements2", names(Data))
+names(Data) <- gsub("^Q62_3$", "Supplements3", names(Data))
+names(Data) <- gsub("^Q62_4$", "Supplements4", names(Data))
+names(Data) <- gsub("^Q73_1.0$", "SupplementsUse", names(Data))
+names(Data) <- gsub("^Q73_2$", "SupplementsUse1A", names(Data))
+names(Data) <- gsub("^Q73_3$", "SupplementsUse2A", names(Data))
+names(Data) <- gsub("^Q73_1_TEXT$", "SupplementsUse3A", names(Data))
+names(Data) <- gsub("^Q73_2_TEXT$", "SupplementsUse1B", names(Data))
+names(Data) <- gsub("^Q73_3_TEXT$", "SupplementsUse2B", names(Data))
+
+names(Data) <- gsub("^Q34$", "SupplementsOpen", names(Data))
+names(Data) <- gsub("^Q34_1_TEXT$", "SupplementsOpen1", names(Data))
+names(Data) <- gsub("^Q34_2_TEXT$", "SupplementsOpen2", names(Data))
+
+names(Data) <- gsub("^Q36_1$", "IronSuppKnowledge1", names(Data))
+names(Data) <- gsub("^Q36_2$", "IronSuppKnowledge2", names(Data))
+names(Data) <- gsub("^Q36_3$", "IronSuppKnowledge3", names(Data))
+names(Data) <- gsub("^Q36_4$", "IronSuppKnowledge4", names(Data))
+names(Data) <- gsub("^Q90_1$", "IronSuppKnowledge1_Certainty", names(Data))
+names(Data) <- gsub("^Q90_2$", "IronSuppKnowledge2_Certainty", names(Data))
+names(Data) <- gsub("^Q90_3$", "IronSuppKnowledge3_Certainty", names(Data))
+names(Data) <- gsub("^Q90_4$", "IronSuppKnowledge4_Certainty", names(Data))
+
+names(Data) <- gsub("^Q37_1$", "IronSuppSE1", names(Data))
+names(Data) <- gsub("^Q37_2$", "IronSuppSE2", names(Data))
+names(Data) <- gsub("^Q37_3$", "IronSuppSE3", names(Data))
+names(Data) <- gsub("^Q37_4$", "IronSuppSE4", names(Data))
+names(Data) <- gsub("^Q37_5$", "IronSuppSE5", names(Data))
+names(Data) <- gsub("^Q37_6$", "IronSuppSE6", names(Data))
+names(Data) <- gsub("^Q37_7$", "IronSuppSE7", names(Data))
+names(Data) <- gsub("^Q37_8$", "IronSuppSE8", names(Data))
+names(Data) <- gsub("^Q37_9$", "IronSuppSE9", names(Data))
+
+names(Data) <- gsub("^Q38$", "IronSuppUse", names(Data))
+names(Data) <- gsub("^Q39_1$", "IronSuppEffect1", names(Data))
+names(Data) <- gsub("^Q39_2$", "IronSuppEffect2", names(Data))
+names(Data) <- gsub("^Q39_3$", "IronSuppEffect3", names(Data))
+names(Data) <- gsub("^Q39_4$", "IronSuppEffect4", names(Data))
+names(Data) <- gsub("^Q39_5$", "IronSuppEffect5", names(Data))
+names(Data) <- gsub("^Q71$", "IronSuppEffect6A", names(Data))
+names(Data) <- gsub("^Q71_1_TEXT$", "IronSuppEffect6B", names(Data))
+
+names(Data) <- gsub("^Q40_1$", "IronSuppSanq1", names(Data))
+names(Data) <- gsub("^Q40_2$", "IronSuppSanq2", names(Data))
+names(Data) <- gsub("^Q40_3$", "IronSuppSanq3", names(Data))
+names(Data) <- gsub("^Q40_4$", "IronSuppSanq4", names(Data))
+names(Data) <- gsub("^Q40_5$", "IronSuppSanq5", names(Data))
+names(Data) <- gsub("^Q40_6$", "IronSuppSanq6", names(Data))
+names(Data) <- gsub("^Q40_7$", "IronSuppSanq7", names(Data))
+names(Data) <- gsub("^Q40_8$", "IronSuppSanq8", names(Data))
+names(Data) <- gsub("^Q40_9$", "IronSuppSanq9", names(Data))
+
+names(Data) <- gsub("^Q41$", "IronSuppSanqReason", names(Data))
+names(Data) <- gsub("^Q41_3_TEXT$", "IronSuppSanqReasonB", names(Data))
+names(Data) <- gsub("^Q77_1$", "IronDefPref1", names(Data))
+names(Data) <- gsub("^Q77_2$", "IronDefPref2", names(Data))
+names(Data) <- gsub("^Q77_3$", "IronDefPref3", names(Data))
+names(Data) <- gsub("^Q77_4$", "IronDefPref4", names(Data))
+
+names(Data) <- gsub("^Q79_1$", "IronSuppSanqCondition1", names(Data))
+names(Data) <- gsub("^Q79_2$", "IronSuppSanqCondition2", names(Data))
+names(Data) <- gsub("^Q79_3$", "IronSuppSanqCondition3", names(Data))
+names(Data) <- gsub("^Q79_4$", "IronSuppSanqCondition4", names(Data))
+names(Data) <- gsub("^Q79_5$", "IronSuppSanqCondition5", names(Data))
+names(Data) <- gsub("^Q79_6$", "IronSuppSanqCondition6", names(Data))
+
+names(Data) <- gsub("^Q81_1$", "IronSuppSanqReason1", names(Data))
+names(Data) <- gsub("^Q81_2$", "IronSuppSanqReason2", names(Data))
+names(Data) <- gsub("^Q81_3$", "IronSuppSanqReason3", names(Data))
+names(Data) <- gsub("^Q81_4$", "IronSuppSanqReason4", names(Data))
+names(Data) <- gsub("^Q81_5$", "IronSuppSanqReason5", names(Data))
+```
+
+
+# Recode variable values #
+```{r}
+# SEX
+## Change sex from 1, 2 to men, women
+Data$Sex <- gsub("1", "Men", Data$Sex)
+Data$Sex <- gsub("2", "Women", Data$Sex)
+
+Data <- Data %>%
+  mutate(Sex = case_when(
+    Sex == "Men" ~ "Men",
+    Sex == "Women" ~ "Women",
+    Sex == 4 & (Sex_other == "Man") ~ "Men"))
+
+
+# MENOPAUSAL STATUS
+# Create groups Men, Pre-menopausal women, Post-menopausal women
+Data <- Data %>%
+  mutate(Group = case_when(
+    Sex == "Men" ~ "Men",
+    Menstruation == 3 ~ "Postmenopausal women", # women who report menopause to postmenopausal group
+    Menstruation == 1 ~ "Premenopausal women", # women who report menstruation to premenopausal group
+    Menstruation == 2 ~ "Premenopausal women", # current/earlier pregnancy to premenopausal group
+    Menstruation == 4 ~ "Premenopausal women", # women who report using contraception
+       Menstruation == 5 & (Age >= 45) ~ "Postmenopausal women", # women >= 45 with no menstruation due to other reason to postmenopausal group
+    Menstruation == 5 & (Age < 45) ~ "Premenopausal women" # women < 45 with no menstruation due to other reason to premenopausal group
+    ))
+
+Data %>% 
+   group_by(Group) %>% 
+  dplyr::summarise ( N = n()) %>% 
+  kable() 
+
+## LIVING AREA
+Data$Area <- gsub("1", "Large city", Data$Area) #<100.000 inhabitants
+Data$Area <- gsub("2", "Small city", Data$Area) #>100.000 inhabitants
+
+Data %>% 
+   group_by(Area) %>% 
+  dplyr::summarise ( N = n()) %>% 
+  kable() 
+
+# EDUCATION
+Data$Education_other <- ifelse(grepl("HBO",Data$Education_other), 5, Data$Education_other)
+Data$Education_other <- ifelse(grepl("Hbo",Data$Education_other), 5, Data$Education_other)
+Data$Education_other <- ifelse(grepl("LEAO", Data$Education_other), 5, Data$Education_other)
+Data$Education_other <- ifelse(grepl("HBS", Data$Education_other), 5, Data$Education_other)
+Data$Education_other <- ifelse(grepl("MAVO",Data$Education_other), 4, Data$Education_other)
+Data$Education_other <- ifelse(grepl("Mavo",Data$Education_other), 4, Data$Education_other)
+Data$Education_other <- ifelse(grepl("PhD",Data$Education_other), 6, Data$Education_other)
+Data$Education_other <- ifelse(grepl("Post",Data$Education_other), 6, Data$Education_other)
+Data$Education_other <- ifelse(grepl("post",Data$Education_other), 6, Data$Education_other)
+Data$Education_other <- ifelse(grepl("Master",Data$Education_other), 6, Data$Education_other)
+Data$Education_other <- ifelse(grepl("Lts",Data$Education_other), 4, Data$Education_other)
+Data$Education_other <- ifelse(grepl("Huishoudschool",Data$Education_other), 3, Data$Education_other)
+Data$Education_other <- ifelse(grepl("HAVO",Data$Education_other), 3, Data$Education_other)
+
+Data <- Data %>%
+  mutate(Education = case_when(
+    Education == 1 ~ "None",
+    Education == 2 ~ "Primary school", # Basisschool
+    Education == 3 ~ "Middle school", # Middelbare school
+    Education == 4 ~ "College", # MAVO
+    Education == 5 ~ "Applied Sciences", # HBO
+    Education == 6 ~ "University", # Universiteit
+    Education == 7 & (Education_other == 3) ~ "Middle school",
+    Education == 7 & (Education_other == 4) ~ "College",
+    Education == 7 & (Education_other == 5) ~ "Applied Sciences",
+    Education == 7 & (Education_other == 6) ~ "University"
+)) 
+
+Data %>% 
+   group_by(Education) %>% 
+  dplyr::summarise ( N = n()) %>% 
+  kable() 
+
+
+# HEALTH
+Data$Health <- gsub("1", "Excellent", Data$Health) 
+Data$Health <- gsub("2", "Very good", Data$Health) 
+Data$Health <- gsub("3", "Good", Data$Health)      
+Data$Health <- gsub("4", "Mediocre", Data$Health)  
+Data$Health <- gsub("5", "Poor", Data$Health)      
+level_order <- c("Excellent", "Very good", "Good", "Mediocre", "Poor") 
+Data %>% 
+   group_by(Health) %>% 
+  dplyr::summarise ( N = n()) %>% 
+  kable() 
+
+
+# DIET
+Data$Diet <- gsub("1", "Vegan", Data$Diet)
+Data$Diet <- gsub("2", "Vegetarian", Data$Diet)
+Data$Diet <- gsub("3", "Pescetarian", Data$Diet)
+Data$Diet <- gsub("4", "Flexitarian", Data$Diet)
+Data$Diet <- gsub("5", "None", Data$Diet)
+
+Data %>% 
+   group_by(Diet) %>% 
+  dplyr::summarise ( N = n()) %>% 
+  kable() 
+
+
+# TYPE OF DONOR (FREQUENT VS NEW)
+Data <- Data %>%
+  mutate(Donor_type = case_when(
+    Number_donation == 4 ~ "New donor",
+    Number_donation == 1 ~ "Frequent donor",
+    Number_donation == 2 ~ "Frequent donor",
+    Number_donation == 3 ~ "Frequent donor",
+    Number_donation == 6 ~ "Frequent donor"))
+
+#NUMBER OF DONATIONS
+Data$Number_donation <- gsub("\\<3\\>", ">10 times", Data$Number_donation)
+Data$Number_donation <- gsub("\\<1\\>", "1-3 times", Data$Number_donation)
+Data$Number_donation <- gsub("\\<4\\>", "New donor", Data$Number_donation)
+Data$Number_donation <- gsub("\\<2\\>", "4-10 times", Data$Number_donation)
+Data$Number_donation <- gsub("\\<5\\>", "Unknown", Data$Number_donation)
+Data$Number_donation <- gsub("\\<6\\>", ">30 times", Data$Number_donation)
+
+Data %>% 
+   group_by(Number_donation) %>% 
+  dplyr::summarise ( N = n()) %>% 
+  kable() 
+
+# LAST DONATION
+Data$Last_donation <- gsub("\\<1\\>", "<6 months", Data$Last_donation)
+Data$Last_donation <- gsub("\\<2\\>", "6-12 months", Data$Last_donation)
+Data$Last_donation <- gsub("\\<3\\>", "1-2 years", Data$Last_donation)
+Data$Last_donation <- gsub("\\<4\\>", ">2 years", Data$Last_donation)
+Data$Last_donation <- gsub("\\<5\\>", "Unknown", Data$Last_donation)
+
+Data %>% 
+   group_by(Last_donation) %>% 
+  dplyr::summarise ( N = n()) %>% 
+  kable() 
+
+
+# DONATION LOCATION
+names(Data)[names(Data) == "Location_donation"] <- "Collection_site"
+Data$Collection_site <- gsub("1", "Fixed location", Data$Collection_site)
+Data$Collection_site <- gsub("2", "Mobile location", Data$Collection_site)
+
+Data %>% 
+   group_by(Collection_site) %>% 
+  dplyr::summarise ( N = n()) %>% 
+  kable() 
+
+
+# DEFERRAL
+Data$Deferral <- gsub("1", "Deferred once", Data$Deferral)
+Data$Deferral <- gsub("2", "Deferred multiple times", Data$Deferral)
+Data$Deferral <- gsub("3", "Never deferred", Data$Deferral)
+Data$Deferral <- gsub("4", "Unknown", Data$Deferral)
+
+Data %>% 
+   group_by(Deferral) %>% 
+  dplyr::summarise ( N = n()) %>% 
+  kable() 
+
+
+#LAST DEFERRAL
+Data$Last_Deferral <- gsub("\\b6\\b", "Unknown", Data$Last_Deferral)
+Data$Last_Deferral <- gsub("\\b1\\b", "Currently deferred", Data$Last_Deferral)
+Data$Last_Deferral <- gsub("\\b2\\b", "<6 months", Data$Last_Deferral)
+Data$Last_Deferral <- gsub("\\b3\\b", "6-12 months", Data$Last_Deferral)
+Data$Last_Deferral <- gsub("\\b4\\b", "1-2 years", Data$Last_Deferral)
+Data$Last_Deferral <- gsub("\\b5\\b", ">2 years", Data$Last_Deferral)
+
+
+Data %>% 
+   group_by(Last_Deferral) %>% 
+  dplyr::summarise (N = n()) %>% 
+  kable() 
+
+
+```
+
+# Missing Data Filtering Outcome Variabeles And Sex
+```{r}
+# Drop NA's in outcome variables (Perception)
+Data %>%
+  filter(across(c("IronSuppSanq1", "IronSuppSanq2", "IronSuppSanq3", "IronSuppSanq4", "IronSuppSanq5", "IronSuppSanq6", "IronSuppSanq7", "IronSuppSanq8", "IronSuppSanq9"), ~!is.na(.)))%>% nrow()
+
+DPS2 <- Data %>%
+  filter(across(c("IronSuppSanq1", "IronSuppSanq2", "IronSuppSanq3", "IronSuppSanq4", "IronSuppSanq5", "IronSuppSanq6", "IronSuppSanq7", "IronSuppSanq8", "IronSuppSanq9"), ~!is.na(.)))
+
+# Remove records with missing information for Sex
+DPS2 %>% filter(is.na(Sex)) %>% nrow()
+DPS2 <- DPS2 %>% 
+  filter(!is.na(Sex))
+
+# Remove Sex_other
+DPS2 <- subset(DPS2, select = -(Sex_other))
+```
+
+# SCORING #
+
+# Sum Score Outcome Variables Perception: Willingness, Invasiveness, and Conditions
+```{r}
+DPS2$FA1_Positive = rowSums(DPS2[ , c("IronSuppSanq1","IronSuppSanq2","IronSuppSanq9")], na.rm = T)
+DPS2$FA2_Intrusive = rowSums(DPS2[ , c("IronSuppSanq5","IronSuppSanq6","IronSuppSanq7")], na.rm = T)
+DPS2$FA3_Conditions = rowSums(DPS2[ , c("IronSuppSanq3","IronSuppSanq4","IronSuppSanq8")], na.rm = T)
+```
+
+
+# Scoring DONATION knowledge variables 
+```{r}
+DPS2$Knowledge1 <- gsub("\\<2\\>", 0, DPS2$Knowledge1)
+DPS2$Knowledge2 <- gsub("\\<1\\>", 0, DPS2$Knowledge2)
+DPS2$Knowledge2 <- gsub("\\<2\\>", 1, DPS2$Knowledge2)
+DPS2$Knowledge3 <- gsub("\\<2\\>", 0, DPS2$Knowledge3)
+DPS2$Knowledge1 <- as.numeric(DPS2$Knowledge1)
+DPS2$Knowledge2 <- as.numeric(DPS2$Knowledge2)
+DPS2$Knowledge3 <- as.numeric(DPS2$Knowledge3)
+```
+
+
+## Recoding POLICY knowledge variables
+```{r}
+# When is Hb/Ferr measured (correct is 1 point)
+DPS2$KnowledgeHb4 <- gsub("\\<2\\>", 0, DPS2$KnowledgeHb4) #Hb measured every donation
+DPS2$KnowledgeFer4 <- gsub("\\<1\\>", 0, DPS2$KnowledgeFer4) # Ferritin measured every donation
+DPS2$KnowledgeFer4 <- gsub("\\<2\\>", 1, DPS2$KnowledgeFer4)
+DPS2$KnowledgeHb4 <- as.numeric(DPS2$KnowledgeHb4)
+DPS2$KnowledgeFer4 <- as.numeric(DPS2$KnowledgeFer4)
+
+
+#Which measurement are perfomed at Sanquin (correct = 1.5 points, wrong = -1, max points = 3)
+DPS2$Measurement1 <- gsub("\\<1\\>", 1.5, DPS2$Measurement1) # Hb
+DPS2$Measurement3 <- gsub("\\<1\\>", 1.5, DPS2$Measurement3) # Ferritin
+DPS2$Measurement1 <- gsub("\\<2\\>", -1, DPS2$Measurement1)
+DPS2$Measurement1 <- gsub("\\<4\\>", -1, DPS2$Measurement1)
+DPS2$Measurement3 <- gsub("\\<2\\>", -1, DPS2$Measurement3)
+DPS2$Measurement3 <- gsub("\\<4\\>", -1, DPS2$Measurement3)
+DPS2$Measurement2 <- gsub("\\<1\\>", -1, DPS2$Measurement2)  # Transferrine
+DPS2$Measurement2 <- gsub("\\<4\\>", -1, DPS2$Measurement2)
+DPS2$Measurement2 <- gsub("\\<2\\>", 0, DPS2$Measurement2)
+DPS2$Measurement4 <- gsub("\\<1\\>", -1, DPS2$Measurement4)  # Hepcidine
+DPS2$Measurement4 <- gsub("\\<4\\>", -1, DPS2$Measurement4)
+DPS2$Measurement4 <- gsub("\\<2\\>", 0, DPS2$Measurement4)
+DPS2$Measurement5 <- gsub("\\<1\\>", -1, DPS2$Measurement5) # Dopamine
+DPS2$Measurement5 <- gsub("\\<4\\>", -1, DPS2$Measurement5)
+DPS2$Measurement5 <- gsub("\\<2\\>", 0, DPS2$Measurement5)
+DPS2$Measurement1 <- as.numeric(DPS2$Measurement1)
+DPS2$Measurement2 <- as.numeric(DPS2$Measurement2)
+DPS2$Measurement3 <- as.numeric(DPS2$Measurement3)
+DPS2$Measurement4 <- as.numeric(DPS2$Measurement4)
+DPS2$Measurement5 <- as.numeric(DPS2$Measurement5)
+
+DPS2$MeasurementSum = rowSums(DPS2[ , c("Measurement1" ,"Measurement2" ,"Measurement3" ,"Measurement4" ,"Measurement5" )], na.rm = T)
+
+DPS2$MeasurementSum[DPS2$MeasurementSum < 0] <- 0 
+
+# Consequence Low Hb (Correct is 1 point, incorrect option = -1)
+DPS2 <- DPS2 %>%
+  mutate(HbConsequence = case_when(
+    ConsequenceHb2 == 1 ~ 1,
+    is.na(ConsequenceHb2) ~ 0,
+    ConsequenceHb2 == 1 & (ConsequenceHb1 == 1 | ConsequenceHb3 == 1 | ConsequenceHb4 == 1 | ConsequenceHb5 == 1 | ConsequenceHb6 == 1 | ConsequenceHb7 == 1) ~ 0))
+
+# Concequence low ferritin (Correct is 1 point, incorrect option = -1)
+DPS2 <- DPS2 %>%
+  mutate(FerConsequence = case_when(
+    ConsequenceFer3 == 1 ~ 1,
+    is.na(ConsequenceFer3) ~ 0,
+    ConsequenceFer2 == 1 & (ConsequenceFer1 == 1 | ConsequenceFer3 == 1 | ConsequenceFer4 == 1 | ConsequenceFer5 == 1 | ConsequenceFer6 == 1 | ConsequenceFer7 == 1) ~ 0))
+
+```
+
+
+# Recoding knowledge Iron Metabolism variables
+```{r}
+# Knowledge iron loss, Hb function, ferritin function
+DPS2$Knowledge4 <- gsub("\\<2\\>", 0, DPS2$Knowledge4)
+DPS2$KnowledgeHb2 <- gsub("\\<2\\>", 0, DPS2$KnowledgeHb2)
+DPS2$KnowledgeHb2 <- gsub("\\<1\\>", 1, DPS2$KnowledgeHb2)
+DPS2$KnowledgeHb3 <- gsub("\\<1\\>", 0, DPS2$KnowledgeHb3)
+DPS2$KnowledgeHb3 <- gsub("\\<2\\>", 1, DPS2$KnowledgeHb3)
+DPS2$KnowledgeHb1 <- gsub("\\<1\\>", 0, DPS2$KnowledgeHb1)
+DPS2$KnowledgeHb1 <- gsub("\\<2\\>", 1, DPS2$KnowledgeHb1)
+DPS2$KnowledgeFer1 <- gsub("\\<2\\>", 0, DPS2$KnowledgeFer1)
+DPS2$KnowledgeFer2 <- gsub("\\<1\\>", 0, DPS2$KnowledgeFer2)
+DPS2$KnowledgeFer2 <- gsub("\\<2\\>", 1, DPS2$KnowledgeFer2)
+DPS2$KnowledgeFer3 <- gsub("\\<2\\>", 0, DPS2$KnowledgeFer3)
+DPS2$Knowledge4 <- as.numeric(DPS2$Knowledge4)
+DPS2$KnowledgeHb3 <- as.numeric(DPS2$KnowledgeHb3)
+DPS2$KnowledgeHb2 <- as.numeric(DPS2$KnowledgeHb2)
+DPS2$KnowledgeHb1 <- as.numeric(DPS2$KnowledgeHb1)
+DPS2$KnowledgeFer1 <- as.numeric(DPS2$KnowledgeFer1)
+DPS2$KnowledgeFer2 <- as.numeric(DPS2$KnowledgeFer2)
+DPS2$KnowledgeFer3 <- as.numeric(DPS2$KnowledgeFer3)
+
+
+# Symptoms iron deficiency 
+DPS2$SymptomsIron1 <- gsub("\\<1\\>", 1, DPS2$SymptomsIron1)
+DPS2$SymptomsIron3 <- gsub("\\<1\\>", 1, DPS2$SymptomsIron3)
+DPS2$SymptomsIron5 <- gsub("\\<1\\>", 0, DPS2$SymptomsIron5)
+DPS2$SymptomsIron6 <- gsub("\\<1\\>", 1, DPS2$SymptomsIron6)
+DPS2$SymptomsIron2 <- gsub("\\<1\\>", -1.5, DPS2$SymptomsIron2)
+DPS2$SymptomsIron4 <- gsub("\\<1\\>", -1.5, DPS2$SymptomsIron4)
+DPS2$SymptomsIron7 <- gsub("\\<1\\>", -3, DPS2$SymptomsIron7)
+DPS2$SymptomsIron8 <- gsub("\\<1\\>", -3, DPS2$SymptomsIron8)
+DPS2$SymptomsIron9 <- gsub("\\<1\\>", -3, DPS2$SymptomsIron9)
+DPS2$SymptomsIron1 <- as.numeric(DPS2$SymptomsIron1)
+DPS2$SymptomsIron2 <- as.numeric(DPS2$SymptomsIron2)
+DPS2$SymptomsIron3 <- as.numeric(DPS2$SymptomsIron3)
+DPS2$SymptomsIron4 <- as.numeric(DPS2$SymptomsIron4)
+DPS2$SymptomsIron5 <- as.numeric(DPS2$SymptomsIron5)
+DPS2$SymptomsIron6 <- as.numeric(DPS2$SymptomsIron6)
+DPS2$SymptomsIron7 <- as.numeric(DPS2$SymptomsIron7)
+DPS2$SymptomsIron8 <- as.numeric(DPS2$SymptomsIron8)
+DPS2$SymptomsIron9 <- as.numeric(DPS2$SymptomsIron9)
+DPS2[, 92:100][is.na(DPS2[, 92:100])] <- 0
+
+DPS2$SympIronDefSum = rowSums(DPS2[ , c("SymptomsIron1","SymptomsIron2","SymptomsIron3","SymptomsIron4","SymptomsIron5", "SymptomsIron6", "SymptomsIron7", "SymptomsIron8", "SymptomsIron9")], na.rm = T)
+
+
+DPS2$SympIronDefSum[DPS2$SympIronDefSum < 0] <- 0 
+```
+
+
+# Recoding Iron Supplements knowledge variables
+```{r}
+# General knowledge iron supplements and availability
+DPS2$IronSuppKnowledge1 <- gsub("\\<1\\>", 0, DPS2$IronSuppKnowledge1)
+DPS2$IronSuppKnowledge1 <- gsub("\\<2\\>", 1, DPS2$IronSuppKnowledge1)
+DPS2$IronSuppKnowledge2 <- gsub("\\<2\\>", 0, DPS2$IronSuppKnowledge2)
+DPS2$IronSuppKnowledge3 <- gsub("\\<1\\>", 0, DPS2$IronSuppKnowledge3)
+DPS2$IronSuppKnowledge3 <- gsub("\\<2\\>", 1, DPS2$IronSuppKnowledge3)
+DPS2$IronSuppKnowledge4 <- gsub("\\<2\\>", 0, DPS2$IronSuppKnowledge4)
+DPS2$IronSuppKnowledge1 <- as.numeric(DPS2$IronSuppKnowledge1)
+DPS2$IronSuppKnowledge2 <- as.numeric(DPS2$IronSuppKnowledge2)
+DPS2$IronSuppKnowledge3 <- as.numeric(DPS2$IronSuppKnowledge3)
+DPS2$IronSuppKnowledge4 <- as.numeric(DPS2$IronSuppKnowledge4)
+
+#Recode Symptoms iron Supplementation into score
+DPS2$IronSuppSE1 <- gsub("\\<1\\>", -1.5, DPS2$IronSuppSE1)
+DPS2$IronSuppSE3 <- gsub("\\<1\\>", -1.5, DPS2$IronSuppSE3)
+DPS2$IronSuppSE5 <- gsub("\\<1\\>", 0, DPS2$IronSuppSE5)
+DPS2$IronSuppSE6 <- gsub("\\<1\\>", 1, DPS2$IronSuppSE6)
+DPS2$IronSuppSE2 <- gsub("\\<1\\>", 1, DPS2$IronSuppSE2)
+DPS2$IronSuppSE4 <- gsub("\\<1\\>", 1, DPS2$IronSuppSE4)
+DPS2$IronSuppSE7 <- gsub("\\<1\\>", -3, DPS2$IronSuppSE7)
+DPS2$IronSuppSE8 <- gsub("\\<1\\>", -3, DPS2$IronSuppSE8)
+DPS2$IronSuppSE9 <- gsub("\\<1\\>", -3, DPS2$IronSuppSE9)
+DPS2$IronSuppSE1 <- as.numeric(DPS2$IronSuppSE1)
+DPS2$IronSuppSE2 <- as.numeric(DPS2$IronSuppSE2)
+DPS2$IronSuppSE3 <- as.numeric(DPS2$IronSuppSE3)
+DPS2$IronSuppSE4 <- as.numeric(DPS2$IronSuppSE4)
+DPS2$IronSuppSE5 <- as.numeric(DPS2$IronSuppSE5)
+DPS2$IronSuppSE6 <- as.numeric(DPS2$IronSuppSE6)
+DPS2$IronSuppSE7 <- as.numeric(DPS2$IronSuppSE7)
+DPS2$IronSuppSE8 <- as.numeric(DPS2$IronSuppSE8)
+DPS2$IronSuppSE9 <- as.numeric(DPS2$IronSuppSE9)
+DPS2[, 143:151][is.na(DPS2[, 143:151])] <- 0
+
+DPS2$SympIronSuppSum = rowSums(DPS2[ , c("IronSuppSE1","IronSuppSE2","IronSuppSE3","IronSuppSE4","IronSuppSE5", "IronSuppSE6", "IronSuppSE7", "IronSuppSE8", "IronSuppSE9")], na.rm = T)
+
+
+DPS2$SympIronSuppSum[DPS2$SympIronSuppSum < 0] <- 0 
+```
+
+
+# Sum scores per knowledge category
+```{r}
+# Knowledge Donation (Max score = 3)
+DPS2$KnowledgeDonation = rowSums(DPS2[ , c("Knowledge1","Knowledge2","Knowledge3")], na.rm = T)
+
+# Knowledge POLICY (Max score = 7)
+DPS2$KnowledgePolicy = rowSums(DPS2[ , c("KnowledgeHb4","KnowledgeFer4","MeasurementSum","HbConsequence","FerConsequence")], na.rm = T)
+
+ # Knowledge IRON METABOLISM (Max score = 10)
+DPS2$KnowledgeIronMetabolism = rowSums(DPS2[ , c("Knowledge4","KnowledgeHb3","KnowledgeHb2","KnowledgeHb1","KnowledgeFer1","KnowledgeFer2","KnowledgeFer3","SympIronDefSum")], na.rm = T)
+
+
+# Knowledge IRON SUPPLEMENTS (Max score = 7)
+DPS2$KnowledgeIronSupplements = rowSums(DPS2[ , c("IronSuppKnowledge1","IronSuppKnowledge2","IronSuppKnowledge3","IronSuppKnowledge4","SympIronSuppSum")], na.rm = T)
+
+
+```
+
+# Sum Score Trust
+```{r}
+# Missings
+Trust <- DPS2[,c(4, 17,21,22)]
+colSums(is.na(Trust)) # 1 missings
+
+# Sum Score
+DPS2$Trust = rowSums(DPS2[ , c("OpinionSanq3","OpinionSanq7","OpinionSanq8")], na.rm = T)
+```
+
+# Recode demographics for analysis
+```{r}
+# PRIOR/CURRENT IRON SUPPLEMENTS USE 
+# 1:Currently prescribed #2: Currently regular #3: Multivitamin #4:In the past #5: never
+DPS2$IronSuppUse <- gsub("\\<1\\>", "Yes", DPS2$IronSuppUse)
+DPS2$IronSuppUse <- gsub("\\<2\\>", "Yes", DPS2$IronSuppUse)
+DPS2$IronSuppUse <- gsub("\\<3\\>", "Yes", DPS2$IronSuppUse)
+DPS2$IronSuppUse <- gsub("\\<4\\>", "Yes", DPS2$IronSuppUse)
+DPS2$IronSuppUse <- gsub("\\<5\\>", "No", DPS2$IronSuppUse)
+
+# ATTITUDE DIETARY SUPPLEMENTS (in general)
+names(DPS2)[names(DPS2) == "Supplements1"] <- "AttitudeDietSupp_Good"
+names(DPS2)[names(DPS2) == "Supplements2"] <- "AttitudeDietSupp_Beneficial"
+names(DPS2)[names(DPS2) == "Supplements3"] <- "AttitudeDietSupp_Healthy"
+names(DPS2)[names(DPS2) == "Supplements4"] <- "AttitudeDietSupp_Valuable"
+DPS2$Attitude_Towards_DietarySuppl = rowSums(DPS2[ , c("AttitudeDietSupp_Good","AttitudeDietSupp_Beneficial","AttitudeDietSupp_Healthy","AttitudeDietSupp_Valuable")], na.rm = F)
+
+# OPEN TOWARDS DIETARY SUPPLEMENTS
+names(DPS2)[names(DPS2) == "SupplementsOpen"] <- "Open_Towards_Dietary_Suppl"
+DPS2$Open_Towards_Dietary_Suppl <- gsub("\\<1\\>", "Yes", DPS2$Open_Towards_Dietary_Suppl)
+DPS2$Open_Towards_Dietary_Suppl <- gsub("\\<2\\>", "No", DPS2$Open_Towards_Dietary_Suppl)
+
+# ACCOUNT FOR IRON LOSS DONATION
+names(DPS2)[names(DPS2) == "AccForIronLoss"] <- "AccountForIronLossAfterDonation"
+DPS2$AccountForIronLossAfterDonation <- gsub("\\<1\\>", "Yes", DPS2$AccountForIronLossAfterDonation)
+DPS2$AccountForIronLossAfterDonation <- gsub("\\<2\\>", "No", DPS2$AccountForIronLossAfterDonation)
+
+# DONOR CAREER
+DPS2 <- DPS2 %>%
+    mutate(DonorCareer = case_when(
+    Number_donation == "New donor" ~ "New",
+    Number_donation == "1-3 times" ~ "Beginner",
+    Number_donation == "4-10 times" ~ "Beginner",
+    Number_donation == ">10 times" ~ "Experienced",
+    Number_donation == ">30 times" ~ "Experienced"))
+
+# EDUCATION
+DPS2 <- DPS2 %>%
+    mutate(Education = case_when(
+    Education == "None" ~ "Low",
+    Education == "Primary school" ~ "Low", 
+    Education == "Middle school" ~ "Low", 
+    Education == "College"~ "Middle", 
+    Education == "Applied Sciences" ~ "High",
+    Education == "University" ~ "High"))
+```
+
+
+# Save datasets
+```{r}
+# Save complete dataset
+saveRDS(DPS2, file.path("L:/DonorMedicin/FORTE/B Donor Perception Survey/B Analysis/R/2. Datasets/", "2. DPS - Complete Cleaned"))
+
+# Save regression dataset
+DPSRegressionData <- DPS2 %>% 
+  dplyr::select(Age, Sex, Area, Group, Donor_type, Education, Health, DonorCareer, Number_donation, Last_donation, Collection_site, Trust, Deferral, Last_Deferral, IronSuppUse, FA1_Positive, FA2_Intrusive, FA3_Conditions, KnowledgeDonation, KnowledgePolicy, KnowledgeIronMetabolism, KnowledgeIronSupplements, Open_Towards_Dietary_Suppl,AccountForIronLossAfterDonation)
+
+saveRDS(DPSRegressionData, file.path("L:/DonorMedicin/FORTE/B Donor Perception Survey/B Analysis/R/2. Datasets/", "3. DPS - Regression Data"))
+```
