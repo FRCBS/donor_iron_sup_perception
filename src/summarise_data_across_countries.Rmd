@@ -21,14 +21,20 @@ knitr::opts_chunk$set(
 )
 library(tidyverse)
 library(readxl)
+library(dplyr)
 
 ```
 
 
 
 ```{r}
+currentDate <- format(Sys.time(), "%Y-%m-%d")
+FolderName <- paste("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/3. Plots/", currentDate,sep="")
+dir.create(FolderName)
+
 # Read in each countries data
 datafi <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - FIN.RDS")
+datafi <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - NL.RDS") #
 datanl <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - NL.RDS")
 #datafr <- readRDS("../data/countfi.RDS")
 
@@ -106,36 +112,82 @@ maketable <- function(subset,country) {
   out
 }
 
+calculate_percentages <- function(data) {
+  data %>%
+    group_by(Variable, Country) %>%
+    mutate(percentage =round(count / sum(count) * 100,1)) %>%
+    ungroup()
+}
+
 ```
 
+# Perception
 
 ```{r}
-
-#Make joint data
+q <- questions %>% filter(Category == "Perception iron supplements as policy") %>% select('Variable name') %>% unlist() %>% as.vector()
 qdata <- bind_rows(
-  maketable(datafi_common[q], country = "FI"), 
-  maketable(datanl_common[q], country = "NL")
-)
-head(qdata, 100)
-```
-
-
-```{r}
-
-#pivot data wider 
-qdata <- qdata %>% pivot_longer(
+  maketable(datafi[q],country="FI"), 
+  maketable(datanl[q],country="NL")) %>%  
+  pivot_longer(
      cols = -c(Variable,Country) ,
     names_to = "answer",
     values_to = "count"
+  ) %>% 
+  left_join(
+    questions %>% select(Question,'Variable name'),
+    by = c("Variable" = "Variable name" )
+  ) %>% 
+  na.omit() %>% 
+  calculate_percentages() %>% 
+  mutate(
+    Statement = sub(".*?, then (.*)", "\\1", Question),
+    Q = sub("(.*), then.*", "\\1", Question),
+    answer = ordered(answer, levels=c("Totally disagree", "Disagree", "Neutral", "Agree", "Totally agree"))
   )
-
-# Do check a bit are number correct
-head(qdata)
 ```
 
+```{r}
+#Faceted by answers
+p <- ggplot(qdata) + 
+  geom_col(aes(x=Country,y=percentage, fill = Country)) + 
+  facet_grid(Statement ~ answer, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
+  ylab("Percentage")+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
+  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  theme_bw()+
+  theme(strip.text.y.right  = element_text(angle = 0))
+
+p
+
+FileName <- paste(FolderName, "/Perception - by statement.png",sep="")
+ggsave(FileName, width = 8, height = 7)
+
+```
 
 ```{r}
-#or just as an example do all at once
+#Faceted by country
+p <- ggplot(qdata) + 
+  geom_col(aes(x=answer,y=percentage, fill = Country)) + 
+  facet_grid(Statement ~ Country, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
+  ylab("Percentage")+
+  xlab(" ")+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
+  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  guides(fill = FALSE)+
+  theme_bw()+
+  theme(strip.text.y.right  = element_text(angle = 0))
+
+p
+
+FileName <- paste(FolderName, "/Perception - by country.png",sep="")
+ggsave(FileName, width = 8, height = 7)
+```
+
+# Preferences 
+
+```{r}
 q <- questions %>% filter(Category == "Preferred consequence of low iron") %>% select('Variable name') %>% unlist() %>% as.vector()
 qdata <- bind_rows(
   maketable(datafi[q],country="FI"), 
@@ -144,30 +196,119 @@ qdata <- bind_rows(
      cols = -c(Variable,Country) ,
     names_to = "answer",
     values_to = "count"
-  ) %>% left_join(
+  ) %>% 
+  left_join(
     questions %>% select(Question,'Variable name'),
     by = c("Variable" = "Variable name" )
-  ) %>% na.omit()
-
-# Add a line break after 4th space.
-
-p <- ggplot(qdata)
-p <- p + geom_col(aes(x=Country,y=count))
-p <- p + facet_grid(Variable ~ answer) +
- theme(strip.text.y.right  = element_text(angle = 0)) 
-p
-
-
+  ) %>% 
+  na.omit() %>% 
+  calculate_percentages() %>% 
+  mutate(Statement = sub(".*?\\?(.*)", "\\1", Question), Q = sub("(.*?\\?.*?)\\s.*", "\\1", Question)
+)
 ```
 
 ```{r}
-#Same with full questions
+#Faceted by answers
+answer.labs <- c("Male", "Female")
+names(answer.labs) <- c("male", "female")
 
-p <- ggplot(qdata)
-p <- p + geom_col(aes(x=Country,y=count))
-p <- p + facet_grid(Question ~ answer, labeller = labeller(Question = label_wrap_gen(width=25, multi_line = TRUE)) ) +
- theme(strip.text.y.right  = element_text(angle = 0)) 
+p <- ggplot(qdata) + 
+  geom_col(aes(x=Country,y=percentage, fill = Country)) + 
+  facet_grid(Statement ~ answer, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  ggtitle(str_wrap(paste0(qdata$Q), width = 75))+
+  ylab("Percentage")+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
+  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  theme_bw()+
+  theme(strip.text.y.right  = element_text(angle = 0))
+
 p
 
+FileName <- paste(FolderName, "/Preferences - by statement.png",sep="")
+ggsave(FileName, width = 8, height = 5)
+```
+```{r}
+#Faceted by country
+p <- ggplot(qdata) + 
+  geom_col(aes(x=answer,y=percentage, fill = Country)) + 
+  facet_grid(Statement ~ Country, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
+  ylab("Percentage")+
+  xlab(" ")+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
+  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  guides(fill = FALSE)+
+  theme_bw()+
+  theme(strip.text.y.right  = element_text(angle = 0))
+
+p
+
+FileName <- paste(FolderName, "/Preferences - by country.png",sep="")
+ggsave(FileName, width = 8, height = 5)
 ```
 
+# Conditions 
+
+```{r}
+q <- questions %>% filter(Category == "Condition for iron supplement use") %>% select('Variable name') %>% unlist() %>% as.vector()
+qdata <- bind_rows(
+  maketable(datafi[q],country="FI"), 
+  maketable(datanl[q],country="NL")) %>%  
+  pivot_longer(
+     cols = -c(Variable,Country) ,
+    names_to = "answer",
+    values_to = "count"
+  ) %>% 
+  left_join(
+    questions %>% select(Question,'Variable name'),
+    by = c("Variable" = "Variable name" )
+  ) %>% 
+  na.omit() %>% 
+  calculate_percentages() %>% 
+  mutate(Statement = sub(".*?\\?(.*)", "\\1", Question), Q = sub("(.*?\\?.*?)\\s.*", "\\1", Question)
+)
+```
+
+```{r}
+#Faceted by answers
+#answer.labs <- c("Male", "Female")
+#names(answer.labs) <- c("male", "female")
+
+p <- ggplot(qdata) + 
+  geom_col(aes(x=Country,y=percentage, fill = Country)) + 
+  facet_grid(Statement ~ answer, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  ggtitle(str_wrap(paste0(qdata$Q), width = 75))+
+  ylab("Percentage")+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
+  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  theme_bw()+
+  theme(strip.text.y.right  = element_text(angle = 0))
+
+p
+
+FileName <- paste(FolderName, "/Conditions - by statement.png",sep="")
+ggsave(FileName, width = 8, height = 5)
+```
+
+```{r}
+#Faceted by country
+answer.labs <- c("Male", "Female")
+names(answer.labs) <- c("male", "female")
+
+p <- ggplot(qdata) + 
+  geom_col(aes(x=answer,y=percentage, fill = Country)) + 
+  facet_grid(Statement ~ Country, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  ggtitle(str_wrap(paste0(qdata$Q), width = 75))+
+  ylab("Percentage")+
+  xlab("")+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
+  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  guides(fill = FALSE)+
+  theme_bw()+
+  theme(strip.text.y.right  = element_text(angle = 0))
+
+p
+
+FileName <- paste(FolderName, "/Conditions - by country.png",sep="")
+ggsave(FileName, width = 8, height = 5)
+```
