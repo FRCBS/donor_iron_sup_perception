@@ -828,7 +828,7 @@ Summary_NL <- dfSummary(tmp,
 ```{r}
 
 
-#datanl <- saveRDS("../data/countfi.RDS")
+datanl <- saveRDS("../data/countfi.RDS")
 
 
 
