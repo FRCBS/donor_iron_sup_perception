@@ -1,0 +1,871 @@
+---
+title: "Donor iron supplement perception study data description and translation - Finland"
+author: "Mikko Arvas"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    df_print: paged
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+---
+
+\tableofcontents
+
+
+```{r setup, include=FALSE}
+
+  
+library(knitr)
+opts_chunk$set(#results = 'asis',      # Can also be set at the chunk-level. IT IS NEEDED IN THE dfsummary chunck
+               comment = NA,
+               prompt  = FALSE,
+               cache   = FALSE,
+               echo = TRUE,
+               message = FALSE,
+               warning = FALSE,
+               width.cutoff=60
+)
+library(summarytools)
+st_options(plain.ascii = FALSE,        # Always use this option in Rmd documents
+           style        = "rmarkdown", # Always use this option in Rmd documents
+           footnote     = NA,          # Makes html-rendered results more concise
+           subtitle.emphasis = FALSE)  # Improves layout with some rmardown themes
+library(tidyverse)
+library(readxl)
+library(lubridate)
+library(summarytools)
+
+```
+
+
+# Read and summarise data
+
+
+```{r}
+Data <- read_excel("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - FR/iDPS - Raw data - France.xlsx")
+data <- Data
+colnames(data)
+```
+
+
+# Translate questions
+```{r}
+
+# Demographics
+names(data) <- gsub("Age", "Age", names(data))
+names(data) <- gsub("Gender", "Sex", names(data))
+names(data) <- gsub("Do you have periods", "Menstruation", names(data))
+names(data) <- gsub("Where do you live", "Area", names(data))
+names(data) <- gsub("Scholarship", "Education", names(data))
+names(data) <- gsub("Health rating", "Health", names(data))
+names(data) <- gsub("Are you vegetarian/vegetalian", "Diet", names(data))
+names(data) <- gsub("Number of donations (lifetime)", "Number_donation", names(data))
+names(data) <- gsub("Last donation", "Last_donation", names(data))
+#names(data) <- gsub("^Q92$", "Dem_Location_donation", names(data))
+#names(data) <- gsub("^Q8_4_TEXT$", "Dem_Sex_other", names(data))
+#names(data) <- gsub("^Q9_5_TEXT$", "Demo_Menstruation_other", names(data))
+
+# Opinions blood service
+names(data) <- gsub("EFS is a professional organisation", "OpinionBloodService1", names(data))
+names(data) <- gsub("Opportunity to ask questions", "OpinionBloodService2", names(data))
+names(data) <- gsub("BS treat my personal information with care", "OpinionBloodService3", names(data))
+names(data) <- gsub("I am approached personally", "OpinionBloodService4", names(data))
+names(data) <- gsub("Disapointed if I could not give blood anaymore", "OpinionBloodService5", names(data))
+names(data) <- gsub("I donate so I can monitor my health status", "OpinionBloodService6", names(data))
+names(data) <- gsub("I trust the donor BS staff", "OpinionBloodService7", names(data))
+names(data) <- gsub("confident that the health of donors is a high priority", "OpinionBloodService8", names(data))
+
+# Donation-related symptoms - severity
+names(data) <- gsub("Severity of bruise", "Symptoms_Donation1_Intensity", names(data))
+names(data) <- gsub("Severity of fainting", "Symptoms_Donation2_Intensity", names(data))
+names(data) <- gsub("Severity of tiredness", "Symptoms_Donation3_Intensity", names(data))
+names(data) <- gsub("Severity :Painful arm", "Symptoms_Donation4_Intensity", names(data))
+names(data) <- gsub("Severity :Feeling unwell", "Symptoms_Donation5_Intensity", names(data))
+names(data) <- gsub("Severity ofdizziness", "Symptoms_Donation6_Intensity", names(data))
+names(data) <- gsub("Severity of blledding", "Symptoms_Donation7_Intensity", names(data))
+names(data) <- gsub("Severity of headache", "Symptoms_Donation8_Intensity", names(data))
+names(data) <- gsub("Importance : Increased energy after the donation", "Symptoms_Donation9_Intensity", names(data))
+names(data) <- gsub("Severity :Thirst", "Symptoms_Donation10_Intensity", names(data))
+
+# Donation-related symptoms
+names(data) <- gsub("Occurrende of bruise", "Symptoms_Donation1", names(data))
+names(data) <- gsub("Occurrence of fainting", "Symptoms_Donation2", names(data))
+names(data) <- gsub("Occurence of tiredness", "Symptoms_Donation3", names(data))
+names(data) <- gsub("Painful arm", "Symptoms_Donation4", names(data))
+names(data) <- gsub("Feeling unwell", "Symptoms_Donation5", names(data))
+names(data) <- gsub("Occurrence of dizziness", "Symptoms_Donation6", names(data))
+names(data) <- gsub("Occurence of bleedding", "Symptoms_Donation7", names(data))
+names(data) <- gsub("Occurrence of headache", "Symptoms_Donation8", names(data))
+names(data) <- gsub("Increased energy after the donation", "Symptoms_Donation9", names(data))
+names(data) <- gsub("Thirst", "Symptoms_Donation10", names(data))
+
+# Knowledge donation - Confidence
+names(data) <- gsub("Confidence rating of answer : A donor gives 500ml of blood", "Knowledge1_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :W are allowed to donate more often than men", "Knowledge2_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :A donor loses red bloo cells", "Knowledge3_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :A donor loses iron during a donation", "Knowledge4_Certainty", names(data))
+
+# Knowledge donation
+names(data) <- gsub("A donor gives 500ml of blood", "Knowledge1", names(data))
+names(data) <- gsub("W are allowed to donate more often than men", "Knowledge2", names(data))
+names(data) <- gsub("A donor loses red bloo cells", "Knowledge3", names(data))
+names(data) <- gsub("A donor loses iron during a donation", "Knowledge4", names(data))
+
+# Knowledge Hb - Confidence
+names(data) <- gsub("Confidence rating of answer :Hb main function is blood clotting", "KnowledgeHb1_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :Hb transports O2", "KnowledgeHb2_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :Hb is a measure of the iron store", "KnowledgeHb3_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :Hb is measured every donation", "KnowledgeHb4_Certainty", names(data))
+
+# Knowledge Hb
+names(data) <- gsub("Hb main function is blood clotting", "KnowledgeHb1", names(data))
+names(data) <- gsub("Hb transports O2", "KnowledgeHb2", names(data))
+names(data) <- gsub("Hb is a measure of the iron store", "KnowledgeHb3", names(data))
+names(data) <- gsub("Hb is measured every donation", "KnowledgeHb4", names(data))
+
+# Knowledge Ferritin - Confidence
+names(data) <- gsub("Confidence rating of answer :Iron is needed for the production of HB", "KnowledgeFer1_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :Iron transports O2", "KnowledgeFer2_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :Ferritin is a measure of iron stores", "KnowledgeFer3_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :Ferritin is measured every donation", "KnowledgeFer4_Certainty", names(data))
+
+# Knowledge Ferritin
+names(data) <- gsub("Iron is needed for the production of HB", "KnowledgeFer1", names(data))
+names(data) <- gsub("Iron transports O2", "KnowledgeFer2", names(data))
+names(data) <- gsub("Ferritin is a measure of iron stores", "KnowledgeFer3", names(data))
+names(data) <- gsub("Ferritin is measured every donation", "KnowledgeFer4", names(data))
+
+# Knowledge measurements
+names(data) <- gsub("is Hb measured", "Measurement1", names(data))
+names(data) <- gsub("Is transferrin measured", "Measurement2", names(data))
+names(data) <- gsub("is ferritin measured", "Measurement3", names(data))
+names(data) <- gsub("is hepcidin measured", "Measurement4", names(data))
+names(data) <- gsub("is dopamine measured", "Measurement5", names(data))
+
+# Consequences low Hb/Ferritin
+names(data) <- gsub("What happens if a donor has a low Hb value", "ConsequenceHb", names(data))
+names(data) <- gsub("What happens if a donor has a low ferritin level", "ConsequenceFer", names(data))
+
+# Prior deferral
+names(data) <- gsub("Have you ever been deferred due to low ferritin or HB", "Deferral", names(data))
+names(data) <- gsub("Have you still deferred", "Deferral_Currently", names(data))
+names(data) <- gsub("When have you been defererred", "Last_Deferral", names(data))
+names(data) <- gsub("The information about deferral was understandable", "DeferralInfo1", names(data))
+names(data) <- gsub("Informative", "DeferralInfo2", names(data))
+names(data) <- gsub("Memorable", "DeferralInfo3", names(data))
+names(data) <- gsub("Useful", "DeferralInfo4", names(data))
+names(data) <- gsub("Clear", "DeferralInfo5", names(data))
+names(data) <- gsub("What information was missing", "Deferral_Info_Lacking", names(data))
+
+# Effect deferral on donor motivation
+names(data) <- gsub("The deferral put me off donating again", "Deferral_Motivation1", names(data))
+names(data) <- gsub("The deferral had no effect", "Deferral_Motivation2", names(data))
+names(data) <- gsub("The defrerral made me want to come back to donate again", "Deferral_Motivation3", names(data))
+names(data) <- gsub("Iif you were deferred would that put you off donating again", "Deferral_Motivation_Hypothetical1", names(data))
+names(data) <- gsub("Would have no effect", "Deferral_Motivation_Hypothetical2", names(data))
+names(data) <- gsub("Would make you want to come back again", "Deferral_Motivation_Hypothetical3", names(data))
+
+# Symptoms ID
+names(data) <- gsub("symptoms of iron deficiency", "SymptomsID", names(data))
+
+# Account for post-donation iron loss
+names(data) <- gsub("do you do anything before you donate to help to mamge any iron loss", "AccForIronLoss", names(data))
+names(data) <- gsub("How do you take into account the amount of iron you lose", "AccForIronLoss_Text", names(data))
+
+# Deferral information sources
+names(data) <- gsub("What information source have you used..", "DeferralSource", names(data))
+names(data) <- gsub("Trust about the information from the EFS", "DeferralSource_Trust1", names(data))
+names(data) <- gsub("From you GP", "DeferralSource_Trust2", names(data))
+names(data) <- gsub("From BS website", "DeferralSource_Trust3", names(data))
+names(data) <- gsub("From other internet sources", "DeferralSource_Trust4", names(data))
+names(data) <- gsub("Others", "DeferralSource_Trust5", names(data))
+
+# Attitude toward iron supplements (should have been supplements in general)
+names(data) <- gsub("I think iron supplement are bad good", "IronSupplements1", names(data))
+names(data) <- gsub("detrimental beneficial", "IronSupplements2", names(data))
+names(data) <- gsub("to be discourgaed encouraged", "IronSupplements3", names(data))
+names(data) <- gsub("worhless worhtwhile", "IronSupplements4", names(data))
+
+# Prior supplement use
+names(data) <- gsub("Did do you take dietary supplements", "SupplementsUse", names(data))
+names(data) <- gsub("Multivitamins", "SupplementsUse_Type_A", names(data))
+names(data) <- gsub("Specific vitamin mineral", "SupplementsUse_Type_B", names(data))
+names(data) <- gsub("Other...100", "SupplementsUse_Type_C", names(data))
+names(data) <- gsub("Why do you take dietary supplements", "SupplementsUse_Reason", names(data))
+  names(data) <- gsub("Other reason", "SupplementsUse_Reason_Other", names(data))
+  names(data) <- gsub("Namely the reason why", "SupplementsUse_Reason_Other_Text", names(data))
+
+# Attitude towards dietary supplements  
+names(data) <- gsub("open to use dietary supplements", "SupplementsOpen", names(data))
+names(data) <- gsub("If yes, what circumstances", "SupplementsOpen1", names(data))
+names(data) <- gsub("If no, why wouldn't you?", "SupplementsOpen2", names(data))
+
+# Kmowledge iron supplements
+names(data) <- gsub("Confidence rating of answer :Iron supplements are provided by the BS …", "IronSuppKnowledge1_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :Iron supplements can improve recovery", "IronSuppKnowledge2_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :Iron supplements are only available with a doctor'sprescription", "IronSuppKnowledge3_Certainty", names(data))
+names(data) <- gsub("Confidence rating of answer :Iron supplements may have side effects", "IronSuppKnowledge4_Certainty", names(data))
+names(data) <- gsub("Iron supplements are provided by the BS …", "IronSuppKnowledge1", names(data))
+names(data) <- gsub("Iron supplements can improve recovery", "IronSuppKnowledge2", names(data))
+names(data) <- gsub("Iron supplements are only available with a doctor'sprescription", "IronSuppKnowledge3", names(data))
+names(data) <- gsub("Iron supplements may have side effects", "IronSuppKnowledge4", names(data))
+
+
+# Side effect iron supplements
+names(data) <- gsub("Do you know the posssible side effects", "IronSuppSE", names(data))
+names(data) <- gsub("Have you ever taken iron supplements", "IronSuppUse", names(data))
+names(data) <- gsub("Impact on your physical activity", "IronSuppEffect1", names(data))
+names(data) <- gsub("On tiredness", "IronSuppEffect2", names(data))
+names(data) <- gsub("On dizziness", "IronSuppEffect3", names(data))
+names(data) <- gsub("On headaches", "IronSuppEffect4", names(data))
+names(data) <- gsub("On GI problems", "IronSuppEffect5", names(data))
+names(data) <- gsub("Other...122", "IronSuppEffect6A", names(data))
+names(data) <- gsub("...123", "IronSuppEffect6B", names(data))
+
+# Concerns iron supplements
+names(data) <- gsub("Do you have any concerns about iron supplements", "Concerns_IronSupp", names(data))
+names(data) <- gsub("Do you have other concerns about iron supplements", "Concerns_IronSupp_Other", names(data))
+names(data) <- gsub("If yes, what cooncerns", "Concerns_IronSupp_Other_Text", names(data))
+
+# Perception
+names(data) <- gsub("If the EFS would offer iron supplements, then", "IronSupp_BloodService", names(data))
+
+# Reasoning
+names(data) <- gsub("Your most important reason to take iron supplement", "IronSupp_Reasoning_Use", names(data))
+
+# Preference
+names(data) <- gsub("A longer interval", "LowIron_Preference1", names(data))
+names(data) <- gsub("Dietary advice", "LowIron_Preference2", names(data))
+names(data) <- gsub("Provision of iron supplements", "LowIron_Preference3", names(data))
+names(data) <- gsub("Stop donations", "LowIron_Preference4", names(data))
+
+# Circumstance iron supplement use
+names(data) <- gsub("In what situation would you be willing to use iron supplements", "IronSupp_Circumstance", names(data))
+
+# Most important reason for providing iron supplements
+names(data) <- gsub("What do you think is most importnat whan considerng iron supplementation…", "IronSupp_Reasoning_Provision", names(data))
+
+data <- data %>% select(-"Suppose it turns out that your iron level is too low which of the following options would you prefer")
+```
+
+
+# Translate answers
+
+
+
+
+## Mapping functions 
+
+```{r}
+#
+
+#col 11 and 12 
+
+f1 <- function (x){
+  x <- fct_recode(x,  
+                  "Disagree" = "2",
+                  "Neutral"="3",
+                  "Agree"="4",
+                  "Totally disagree" =  "1",
+                  "Totally agree" = "5"
+  )
+  x <- factor(
+    x,
+    levels = c("Totally disagree","Disagree","Neutral","Agree","Totally agree"),
+    ordered = TRUE
+  )
+  x
+}
+
+f2 <- function (x){
+  x <- fct_recode(x,  
+                  "Never" = "something_in_some_language",
+                  "Sometimes" = "something_in_some_language",
+                  "Often" = "something_in_some_language",
+                  "Always" = "Aina"
+  )
+  x <- factor(
+    x,
+    levels = c("Never","Sometimes","Often","Always"),
+    ordered = TRUE
+  )
+  x  
+}
+
+f3 <- function (x){
+  x <- fct_recode(x,  
+                  "1" = "1",
+                  "5" = "5"
+                  )
+  x <- factor(
+    x,
+    levels=c("1","2","3","4","5","6"),
+    ordered = TRUE
+  )
+  x
+}
+
+f4 <- function (x){
+  x <- fct_recode(x,
+                  "FALSE" = "something_in_some_language",
+                  "TRUE" = "something_in_some_language"
+                  
+                  )
+  x <- factor(
+    x,
+    levels=c("FALSE","TRUE"),
+  )
+  x
+}
+
+f5 <- function (x){
+  x <- fct_recode(x, 
+    "50/50" = "0.5",
+    "100%" = "1"
+  )
+  x <- factor(
+    x,
+    levels = c("50/50","100%"),
+    ordered = TRUE
+  )
+  x
+}
+
+
+
+
+f6 <- function (x){
+  x <- fct_recode(x,
+                  "No" = "something_in_some_language",
+                  "Yes" = "something_in_some_language"
+                  
+                  )
+  x <- factor(
+    x,
+    levels=c("No","Yes"),
+  )
+  x
+}
+
+
+f7 <- function (x){
+  x <- as.character(x)
+  x <- fct_recode(x,  
+                  "FALSE" = "0",
+                  "TRUE" = "1"
+                  )
+  x <- factor(
+    x,
+    levels=c("FALSE","TRUE"),
+  )
+  x
+}
+
+f8 <- function (x){
+  x <- fct_recode(x,  
+                  "Increased" = "something_in_some_language",
+                  "No effect" = "something_in_some_language",
+                  "Decreased" = "something_in_some_language"
+  )
+  x <- factor(
+    x,
+    levels=c("Increased","No effect","Decreased"),
+  )
+  x
+}
+
+f9 <- function (x){
+  x <- fct_recode(x,
+                  "Agree" = "something_in_some_language",
+                  "Disagree" = "something_in_some_language"
+                  
+                  )
+  x <- factor(
+    x,
+    levels=c("Agree","Disagree"),
+  )
+  x
+}
+
+f10 <- function (x){
+  x <- factor(
+    x,
+    levels=c("1","2","3","4","5","6"),
+    ordered = TRUE
+  )
+  x
+}
+
+f11 <- function (x){
+  x <- factor(
+    x,
+    levels=c("1","2","3","4","5"),
+    ordered = TRUE
+  )
+  x
+}
+
+
+```
+
+
+## Main processing
+
+```{r}
+
+for (col in names(data)) {
+  data[[col]] <- ifelse(data[[col]] == 'Not applicable', NA, data[[col]])
+}
+
+for (col in names(data)) {
+  data[[col]] <- ifelse(data[[col]] == '5 4', '5', data[[col]])
+}
+
+selected_cols <- grep("_Certainty", names(data), value = TRUE)
+data[selected_cols] <- lapply(data[selected_cols], as.character)
+
+
+
+# Columns containing just yes and no
+yesandnocols <- data %>% head(n=1) %>% mutate_all(~str_detect(.,"^NO$")) %>% 
+  bind_rows(
+data %>% head(n=1) %>% mutate_all(~str_detect(.,"^YES$")) ) %>% 
+  summarise(across(everything(), ~ any(.x)))
+
+#Columns containing just 0 or 1
+zero1cols <- data %>%  
+  summarise(across(everything(), ~ str_c(names(table(.x)),collapse="") == "01"))
+
+#Columns containing just 1-5
+cols12345 <- data %>% summarise(across(everything(), ~ str_c(names(table(.x)),collapse="") == "12345"))
+cols1345 <- data %>% summarise(across(everything(), ~ str_c(names(table(.x)),collapse="") == "1345"))
+cols2345 <- data %>% summarise(across(everything(), ~ str_c(names(table(.x)),collapse="") == "2345"))
+
+cols12345 <- bind_rows(cols12345,
+                       cols1345,
+                       cols2345) %>%  
+  summarise(across(everything(), ~ any(.x))) & !str_detect(colnames(data) ,"^49\\.\\d")
+#49 has scale from 1-6. But if there are no 6s then it is detected here and ruins things later
+
+
+tmp <- data %>% 
+ # mutate(`something_in_some_language` = as.Date(`something_in_some_language`)) %>% 
+ # mutate( `1.0: something_in_some_language` = as.numeric(`1.0: something_in_some_language`)  ) %>%
+  #here a set of questions is detected with some regular expression and then one of the
+  #processing functions above is applied to process those questions
+  mutate_at(vars(which(str_detect(colnames(data) ,"OpinionBloodService"))), ~ f1(.) ) %>% 
+  mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f2(.) ) %>% 
+  mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f3(.) ) %>% 
+  mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f4(.) ) %>% 
+  mutate_at(vars(which(str_detect(colnames(data) ,"_Certainty"))), ~ f5(.) ) %>%
+  #here instead of a regular expression, above a vector is made which tells which columns to process
+  mutate_at(vars(which(as.logical(yesandnocols))), ~ f6(.) ) %>%
+  mutate_at(vars(which(as.logical(zero1cols))), ~ f7(.) ) %>%
+  mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f8(.) ) %>% 
+  mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f9(.) ) %>%
+  mutate_at(vars(which(str_detect(colnames(data) ,"something_in_some_language"))), ~ f10(.) ) %>%
+  mutate_at(vars(which(cols12345)), ~ f11(.) ) %>%
+  mutate(
+    `2: something_in_some_language` =  fct_recode(`2: something_in_some_language`,  
+                  "Male" = "something_in_some_language",
+                  "Female" = "something_in_some_language",
+                  "Non-binary" = "something_in_some_language",
+                  "Prefer not to say" = "something_in_some_language"
+                  ),
+    `3: something_in_some_language?` = fct_recode(`3: something_in_some_language`,  
+    "Yes" = "something_in_some_language",
+    "No, due to current pregnancy" = "something_in_some_language",
+    "No, due to menopause" = "something_in_some_language",
+    "No, due to current contraception use" = "something_in_some_language"
+     ),  
+    
+    `4: something_in_some_language` = fct_recode(`4: something_in_some_language?`,
+                     "In a city of over 100,000 people" = "something_in_some_language",
+                    "In a town of less than 100,000 people, or in the countryside" = "something_in_some_language"
+                                                 
+    ),
+      `5: something_in_some_language?` =fct_recode(`5: something_in_some_language?`,
+"None" = "something_in_some_language",
+"Primary school" = "something_in_some_language", 
+"High school" = "something_in_some_language",
+"College" = "something_in_some_language",
+"University" = "something_in_some_language",
+      ) %>% fct_relevel(
+        "None",
+"Primary school", 
+"High school",
+"College",
+"University"
+      ) %>% as.ordered(.)
+,
+    `6: something_in_some_language` = fct_recode(    `6: something_in_some_language`,
+"Excellent" =  "something_in_some_language",
+"Very good" =  "something_in_some_language",
+"Good" =   "something_in_some_language",
+"Fair" =  "something_in_some_language",
+"Poor" =  "Huono"
+) %>% fct_relevel(.,
+"Poor",
+"Fair",
+"Good",
+"Very good",
+"Excellent",  
+) %>% as.ordered(.)
+,
+    `7: something_in_some_language` =
+  str_replace_all(data$`7: something_in_some_language`,"\\(|\\)","_") %>% 
+    fct_recode(.,
+      "Yes, vegan (no animal products)" =  "something_in_some_language",
+"Yes, vegetarian (no meat and no fish)" =  "something_in_some_language",
+"Yes, pescatarian (no meat)" =  "something_in_some_language",
+"Yes, flexitarian (at least three days without meat)" = "something_in_some_language" ,
+"Yes, lakto-ovovegan (no meat and no fish, but milk and eggs)" = "something_in_some_language",
+"No" = "something_in_some_language"
+
+    ),    
+    `8: something_in_some_language` = fct_recode(`8: something_in_some_language`,
+      "1 - 3 times" = "something_in_some_language",
+"4 - 10 times" = "something_in_some_language",
+"More than 10 times" = "something_in_some_language",
+"None" = "something_in_some_language"
+    ) %>% fct_relevel(.,
+    "None",
+    "1 - 3 times",
+"4 - 10 times",
+"More than 10 times"
+) %>% as.ordered(.)
+,
+    `9: something_in_some_language` = fct_recode(`9: something_in_some_language`,
+"Within the last 6 months" =  "something_in_some_language",
+"6 months to a year ago" =  "something_in_some_language",
+"1-2 years ago" =  "something_in_some_language",
+"I cannot remember" = "something_in_some_language",
+    ) %>% fct_relevel(.,
+"Within the last 6 months",
+"6 months to a year ago",
+"1-2 years ago",
+"I cannot remember"
+                      ) %>% as.ordered(.)
+
+,
+`21: something_in_some_language`
+=fct_recode(`21: something_in_some_language`,
+            "No" = "something_in_some_language",
+            "I don’t know"= "something_in_some_language",
+            "Yes, once "= "something_in_some_language",
+            "Yes, multiple times "= "something_in_some_language"
+            
+),
+
+`29: something_in_some_language` = 
+  fct_recode(`29: something_in_some_language`,
+             "I take iron supplements acquired by myself"    = "something_in_some_language",
+             "I take multivitamins that contain iron "   = "something_in_some_language",
+             "I take iron supplements provided by the blood service"  = "something_in_some_language",
+             "I take iron supplements acquired by myself"  = "something_in_some_language",
+             "I eat more iron-rich foods"    = "something_in_some_language",
+             "I take iron supplements acquired by myself"   = "something_in_some_language"
+  ),        
+`34: something_in_some_language` =
+  fct_recode(`34: something_in_some_language`,
+             "Never" = "something_in_some_language",
+             "Not anymore" =  "something_in_some_language",
+             "Sometimes" =  "something_in_some_language",
+             "Every day" =  "something_in_some_language"
+  ),
+`41: something_in_some_language` =
+  fct_recode(`41: something_in_some_language`,
+             "No, I have never taken iron (containing) supplements " = "something_in_some_language",
+             "Yes, I am currently taking iron supplements ordered to me by a doctor"    = "something_in_some_language",
+             "Yes, I am currently taking iron supplements from a drugstore"   =  "something_in_some_language",
+             "Yes, I am currently taking iron supplements provided to me by the blood service" = "something_in_some_language", 
+             "Yes, I take multivitamins that contain iron "  =  "something_in_some_language", 
+             "I am taking multivitamins, but I do not know whether or not they contain iron" = "something_in_some_language",
+             "I have taken iron supplements/multivitamins before, but not anymore "      = "something_in_some_language" 
+             
+  ),
+
+
+
+  )
+  
+```
+
+
+# Deal with open text answers
+
+## 3: something_in_some_language
+
+```{r}
+tmp %>% count(`3: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+```
+
+
+```{r}
+
+
+tmp <- tmp %>%  
+  mutate(
+    `something_in_some_language` = str_remove_all(`something_in_some_language`,"\""), # there we some extra '\' that needed to be removed
+  `3: something_in_some_language` = fct_recode(`3: something_in_some_language`,
+ "No, other" =              "something_in_some_language",
+ "No, other" =              "something_in_some_language",
+ #... maybe some other alternative open text answers
+  "No, due to menopause" =  "something_in_some_language",
+# ...
+   "No, due to current contraception use"  =           "something_in_some_language",
+#... 
+  "No, due to hysterectomy" =             "something_in_some_language",
+"No, due to menopause"    =           "something_in_some_language",
+  "No, other" =             "something_in_some_language",
+
+)
+)
+
+tmp %>% count(`3: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+
+
+```
+
+
+## 5: Mikä on korkein suorittamasi koulutusaste?
+
+
+```{r}
+tmp %>% count(`5: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+
+
+```
+
+```{r}
+tmp <- tmp %>% mutate(
+  `5: something_in_some_language` =fct_recode(`5: something_in_some_language`,
+ "High school" = "something_in_some_language",
+# ... maybe some other alternatives
+ "Primary school" = "something_in_some_language",
+"High school" ="something_in_some_language",
+"College" ="something_in_some_language",
+"University" = "something_in_some_language"
+),
+ `5: something_in_some_language` = fct_relevel(
+    `5: something_in_some_language`,
+    "Primary school",
+    "High school",
+    "College",
+    "University"
+  ),
+  `5: something_in_some_language` = as.ordered(
+    `5: something_in_some_language`)
+)
+
+tmp %>% count(`5: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+```
+
+
+## 24: Mistä olisit halunnut lisätietoja?
+
+
+```{r}
+tmp %>% count(`24: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+```
+
+
+
+
+```{r}
+tmp <- tmp %>% mutate(
+`24: something_in_some_language` = 
+  fct_recode(`24: something_in_some_language`,
+    "Other"= "something_in_some_language", 
+    "Iron stores/ferritin" = "something_in_some_language", 
+    "Other" = "something_in_some_language", 
+    "Information on the consequences of low hemoglobin levels" = "something_in_some_language", 
+    "Information on how to restore hemoglobin levels" = "something_in_some_language", 
+    "Information on what hemoglobin is" = "something_in_some_language", 
+   "No information was missing" =  "something_in_some_language" 
+
+  ),
+)
+
+```
+
+
+```{r}
+tmp %>% count(`24: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+```
+
+
+## 36: Onko olemassa jokin muu syy, miksi käytät tai olet käyttänyt ravintolisiä?`
+
+
+```{r}
+tmp %>% count(`36: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+```
+
+
+
+```{r}
+tmp <- tmp %>% mutate(
+  `36: something_in_some_language` =
+    case_when(
+      !is.na(`36: something_in_some_language`) & 
+        `36: something_in_some_language` != "No" ~ "Other",
+      TRUE ~ `36: something_in_some_language`
+          ),        
+   `36: something_in_some_language` = 
+    as_factor(`36: something_in_some_language`)    
+
+)
+```
+
+
+```{r}
+tmp %>% count(`36: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+```
+
+
+## 44: Askarruttaako jokin muu rautalisiin liittyvä asia sinua?
+
+
+```{r}
+tmp %>% count(`44: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+
+```
+
+
+```{r}
+tmp <- tmp %>% mutate(
+  `44: something_in_some_language` =
+    case_when(
+      !is.na(`44: something_in_some_language`) & 
+        `44: something_in_some_language` != "No" ~ "Other",
+      TRUE ~ `44: something_in_some_language`
+          ),        
+   `44: something_in_some_language` = 
+    as_factor(`44: something_in_some_language`)
+)
+```
+
+
+```{r}
+tmp %>% count(`44: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+```
+
+## 46: Mikä on sinulle tärkein syy ottaa vastaan Veripalvelun tarjoama rautalisä?
+
+
+```{r}
+tmp %>% count(`46: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+```
+
+
+```{r}
+tmp <- tmp %>% mutate(
+  `46: something_in_some_language` =
+    fct_recode(`46: something_in_some_language`,
+               "To improve my health" = "something_in_some_language",
+               # ... maybe some alternative ansers
+               "To be able to donate without delays" = "something_in_some_language",
+               "I would never take them" = "something_in_some_language" ,
+               "To improve my health" = "something_in_some_language",
+               "Other" = "something_in_some_language",
+               "Other" = "something_in_some_language",
+               "To recover from donation" = "something_in_some_language"
+    )
+)
+
+
+```
+
+
+
+```{r}
+tmp %>% count(`46: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+```
+
+
+## Removed open texts
+
+### 37.1: Voisitko harkita ravintolisien käyttöä?: Kyllä, koska
+
+```{r}
+tmp %>% count(`37.1: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+```
+
+
+### 37.2: Voisitko harkita ravintolisien käyttöä?: En, koska
+
+```{r}
+tmp %>% count(`37.2: something_in_some_language`) %>% arrange(desc(n)) %>% print( n = 1e3)
+ 
+```
+
+
+```{r}
+
+```
+
+
+
+
+```{r}
+summary(tmp)
+```
+
+
+
+
+## Translate questions
+
+```{r}
+
+questions <- read_excel("../data/Tulokset - Donor Perception Survey question translations (ID 125823).xlsx")
+questions <- questions %>% 
+  mutate(
+    QuestionWNo = str_c(str_extract(Kysymys, "^.*\\d+\\:")," ",Question) %>% str_replace("\\.0\\:",":") %>% 
+      str_replace("\\.$","") %>% str_replace_all("\\.\\:",":") 
+  )
+
+
+```
+
+
+```{r}
+data <- tmp %>% select(-`Päivämäärä`)
+colnames(data) <- questions$QuestionWNo
+
+#Remove 37.1 and 37.2
+data <- data %>% 
+  select(-(which(str_detect(colnames(data) ,"^37\\.\\d"))))
+
+save(data,file="../results/donorironpercep.rdata")
+```
+
+```{r}
+
+colclasses <- data %>% ungroup %>% summarise(across(everything(), ~ class(.x))) %>% t() %>% as_tibble(rownames="col")
+
+colclasses %>% count(V1)
+
+```
+
+
+
+
+# Summarise 
+
+
+```{r}
+dfSummary(data,
+          plain.ascii = FALSE, 
+          style = "grid", 
+          graph.col = TRUE,
+          graph.magnif = 0.75, 
+          valid.col = FALSE, 
+          tmp.img.dir = "/tmp")
+
+
+```
+
+

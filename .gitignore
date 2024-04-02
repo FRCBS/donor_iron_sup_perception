@@ -1,0 +1,8 @@
+#Ignore 
+data/*
+results/*
+#Specifically exclude just for the record
+.Rproj.user
+.Rhistory
+.RData
+*.Rproj

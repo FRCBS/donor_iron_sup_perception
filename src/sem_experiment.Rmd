@@ -1,0 +1,271 @@
+---
+title: "Donor iron supplement perception: sem donors FI"
+author: "Mikko Arvas"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    theme: united
+    df_print: paged
+---
+
+
+
+<div style="width = 100%">
+
+
+```{r setup, include=TRUE}
+#echo "rmarkdown::render('sem_experiment.Rmd', clean=TRUE,output_format='html_document',output_file='../results/sem_experiment.html')" | R --slave
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+library(tidyverse)
+library(lavaan)
+library(blavaan)
+library(tidySEM) # plotting option
+library(semPlot) # plotting option -> does not work wih data as ordered factor
+library(lavaanPlot)  # plotting option 
+#https://rpubs.com/dustinfife/flexplavaan2 there is also a blavaan bayes package that allows for non-normalities and non-linearities
+```
+
+
+Questions:
+
+1. How to deal with ordered factors?
+
+2. First item needs to be positively correlated with the latent variable or we need constrain the variation of the latent variable to 1?
+
+3. How to diagnose the model, how to know is it good enough?
+
+4. How to decide should we declare some variables correlated? Especially as we don't know results of other countries?
+
+5. What to do with missing data?
+
+
+
+# Load data
+
+```{r}
+load("../data/donorironpercep.rdata")
+
+#We only want to look at blood donors
+data <- data %>% 
+  filter(!`8: How many times have you donated whole blood in your lifetime?` == "None")
+
+```
+
+
+## Variables
+
+Make variable names compatible to lavaan formula syntax.
+
+```{r}
+
+questions <- str_c(str_replace_all(colnames(data),pattern = ": .* ", ":") %>% 
+                         str_replace_all(.,":.*","") %>% 
+                         str_replace_all(.,"^","q") %>% 
+                         str_replace_all(.,"\\.","s"), " : ",
+                       colnames(data)
+) %>% as_tibble()
+
+colnames(data) <- str_replace_all(colnames(data),pattern = ": .* ", ":") %>% 
+                         str_replace_all(.,":.*","") %>% 
+                         str_replace_all(.,"^","q") %>% 
+                         str_replace_all(.,"\\.","s")
+
+
+#It would make sense to add the latent variable information to this table
+
+questions
+```
+
+
+# lavaan
+
+## semPlot example
+
+```{r}
+cdata01 <- data %>% 
+  select(q45s1,q45s2 ,q45s3 , q45s4 , q45s5 , q45s6 , q45s7 ,  q45s8 , q45s9,
+         q10s1, q10s2, q10s3, q10s4, q10s5, q10s6 , q10s7 , q10s8,
+         q1,q2) %>% na.omit() %>% 
+  filter(q2 == "Male" | q2 == "Female" ) #%>% 
+
+
+isordered <- cdata01 %>%  summarise(across(everything(), ~ is.ordered(.x))) %>%  as.logical() %>% which()
+isfactor <- cdata01 %>%  summarise(across(everything(), ~ is.factor(.x))) %>%  as.logical() %>% which()
+#isfactor <- setdiff(isfactor, isordered)
+
+
+cdata02 <- cdata01 %>%
+  mutate(
+    across(isfactor, ~ fct_drop(.x)
+    )
+  ) %>% 
+mutate(
+    across(isfactor, ~ as.numeric(.x)
+    )
+)
+
+
+cdata02 %>%  summarise(across(everything(), ~ class(.x))) %>% t()
+
+```
+```{r}
+summary(cdata02)
+```
+
+
+
+```{r}
+model <- '
+#measurement model
+## attitude towards blood service offering iron
+#attbsi =~ q45_1 + q45_2 + q45_3 + q45_4 + q45_5 + q45_6  + q45_7 +  q45_8 + q45_9
+## attitude towards blood service
+#attbs  =~ q10_1 + q10_2 + q10_3 + q10_4 + q10_5 + q10_6 + q10_7 + q10_8 
+
+attbsi =~ q45s1 + q45s2 + q45s3 + q45s4 + q45s5 + q45s6  + q45s7 +  q45s8 + q45s9
+attbs  =~ q10s1 + q10s2 + q10s3 + q10s4 + q10s5 + q10s6 + q10s7 + q10s8 
+
+
+# regression
+attbsi ~ attbs + q1 + q2
+
+'
+```
+
+
+```{r}
+fit_semplot <- sem(
+  model, 
+  data = cdata02,
+  #ordered = colnames(cdata02)[isordered] #semplot does not understand ordered variables
+  estimator = "DWLS" # set estimator and hope for the best
+  )
+summary(fit_semplot, standardized = TRUE)
+
+# stimator                                       DWLS
+#   Optimization method                           NLMINB
+#   Number of model parameters                        87
+
+
+```
+
+
+
+```{r}
+
+semPaths(fit_semplot,"std")
+
+# if you have an ordered variable this will fail
+# hence make ordered numeric and tell fitting what is ordered
+# Error in dimnames(x) <- dn :
+# length of 'dimnames' [2] not equal to array extent
+
+
+#graph_sem(model = fit) instead
+
+```
+
+
+## tidySEM example
+
+tidySEM plotting understands ordered factors so no need to do anything else than drop empty factor levels.
+
+```{r}
+cdata03 <- cdata01 %>%
+  mutate(
+    across(isfactor, ~ fct_drop(.x)
+    )
+  )
+
+cdata03 %>%  summarise(across(everything(), ~ class(.x))) %>% t()
+
+```
+
+```{r}
+summary(cdata02)
+```
+
+
+```{r}
+fit_tidysem <- sem(
+  model, 
+  data = cdata03,
+  estimator = "DWLS" 
+  )
+summary(fit_semplot, standardized = TRUE)
+
+
+```
+
+
+
+```{r}
+graph_sem(model = fit_tidysem)
+```
+
+
+```{r}
+graph_sem(model = fit_semplot)
+```
+
+
+## lavaanPlot example
+
+```{r}
+lavaanPlot(model=fit_tidysem)
+```
+
+```{r}
+lavaanPlot(model=fit_semplot)
+```
+
+
+# blavaan
+
+```{r}
+#https://ecmerkle.github.io/blavaan/articles/ordinal.html
+# lavaan results to blavaan results, you need to use the argument parameterization = "theta" 
+#  blavaan estimates are usually closer to estimator="PML" in lavaan.
+fit_bla <- bsem(
+  model,
+  data = cdata02, #only works with numeric non-categorical data
+  n.chains = 4,
+  burnin = 500,
+  target = "stan",
+  seed="42",
+  #missing = "listwise",
+  ordered = colnames(cdata02)[isordered], #but you can tell what should be categorial
+  #,
+  estimator = "DWLS"
+#estimator = "PML"
+  )
+```
+
+
+```{r}
+summary(fit_bla, standardized = TRUE)
+
+```
+
+# Compare models
+
+```{r}
+
+# x$pe$est # tuola vois olla, muuta
+#  x$pe$std.lv
+#  standardizedsolution(fit_semplot)
+ 
+regparams <- bind_rows(
+  bind_cols(parameterestimates(fit_semplot),model = "semplot" ),
+    bind_cols(parameterestimates(fit_tidysem),model = "tidysem" ), 
+ bind_cols(parameterestimates(fit_bla),model = "bla" ) 
+)
+
+#these can be done as a forest plot
+```
+

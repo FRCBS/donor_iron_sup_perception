@@ -1,0 +1,218 @@
+---
+title: "Donor iron supplement perception data summary across countries"
+author: "Mikko Arvas"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    theme: united
+---
+
+
+
+
+
+```{r setup, include=FALSE}
+#echo "rmarkdown::render('summarise_data_across_countries.Rmd', clean=TRUE,output_format='html_document',output_file='../results/summarise_data_across_countries.html')" | R --slave
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+library(tidyverse)
+library(readxl)
+library(here)
+
+```
+
+
+
+```{r}
+# Read in each countries data
+#datafi <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - FIN.RDS")
+#datanl <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - NL.RDS")
+#datafr <- readRDS("../data/countfi.RDS")
+datafi <- readRDS(here("data/countfi.RDS"))
+datanl <- readRDS(here("data/countfi.RDS"))
+datafr <- readRDS(here("data/countfi.RDS"))
+
+# Create dataset with all the names 
+vars_datafi <- names(datafi)
+vars_datanl <- names(datanl)
+
+# Compare common variables
+common_vars <- intersect(vars_datafi, vars_datanl)
+
+# Select common variables
+datafi_common <- datafi[common_vars]
+datanl_common <- datanl[common_vars]
+
+
+
+# #filter the question metadata to what all have in common
+#questions <- read_excel("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/DPS Variable Overview.xlsx")
+questions <- read_excel(here("data/Kopio_DPS Variable Overview.xlsx"))
+questions <- questions %>% inner_join(
+  tibble(variablesfi=names(datafi_common)),
+         by=c("Variable name"= "variablesfi")
+         )
+
+
+questions <- questions %>% inner_join(
+  tibble(variablesnl=names(datanl_common)),
+         by=c("Variable name"= "variablesnl")
+         )
+
+
+
+
+questions <- questions %>% inner_join(
+  # [1:30] is just an example
+  tibble(variablesfr=names(datafr)[1:30]),
+         by=c("Variable name"= "variablesfr")
+         )
+
+questions %>% select('Variable name', Values)
+```
+
+
+
+```{r}
+
+#Extract  a vector of questions which are all answered in the same way.
+q <- questions %>% filter(Category == "Donor experience") %>% select('Variable name') %>% unlist() %>% as.vector()
+
+q
+```
+
+
+
+```{r}
+
+maketable <- function(subset,country) {
+  #Get the levels
+#  listoflevels <- unique(lapply(datafi[q],names))
+  listoflevels <- unique(lapply(subset,names))
+  #some lists are shorter due to lacking values, find the longest unique set of levels
+  listlength <- unlist(lapply(listoflevels,length))
+  cvalues <- unlist(listoflevels[which(listlength %in% max(unlist(lapply(listoflevels,length))))])
+  out <- matrix(NA, nrow = length(subset), ncol = length(cvalues))
+  colnames(out) <- cvalues
+  for (i in 1:length(subset)){
+    iname <- names(subset)[[i]]
+    for (j in cvalues) {
+      out[i,j] <- subset[[iname]][j]
+    }
+  }
+  out <- as_tibble(out)
+  out$Variable <- names(subset)
+  out$Country <- country
+  out
+}
+
+```
+
+
+```{r}
+
+#Make joint data
+qdata <- bind_rows(
+  maketable(datafi_common[q], country = "FI"), 
+  maketable(datanl_common[q], country = "NL")
+)
+head(qdata)
+```
+
+
+```{r}
+
+#pivot data wider 
+qdata <- qdata %>% pivot_longer(
+     cols = -c(Variable,Country) ,
+    names_to = "answer",
+    values_to = "count"
+  )
+
+# Do check a bit are number correct
+head(qdata)
+```
+
+```{r}
+
+qdata <- qdata %>% 
+  group_by(Country, Variable) %>% 
+  mutate(
+    pros = count / sum(count)
+  )
+
+head(qdata)
+```
+
+
+```{r}
+
+qdata %>% 
+  filter(Country== "FI" & Variable == "OpinionBloodService1") %>% 
+  select(count, pros)
+
+```
+
+```{r}
+92 /sum(91 + 1 +7 +592+7)
+
+```
+
+
+
+```{r}
+#or just as an example do all at once
+q <- questions %>% filter(Category == "Donor experience") %>% select('Variable name') %>% unlist() %>% as.vector()
+qdata <- bind_rows(
+  maketable(datafi[q],country="FI"), 
+  maketable(datanl[q],country="NL")) %>%  
+  pivot_longer(
+     cols = -c(Variable,Country) ,
+    names_to = "answer",
+    values_to = "count"
+  ) %>% group_by(Country, Variable) %>% 
+  mutate(
+    pros = count / sum(count)
+  ) %>% 
+  left_join(
+    questions %>% select(Question,'Variable name'),
+    by = c("Variable" = "Variable name" )
+  ) %>% na.omit()
+
+# Add a line break after 4th space.
+
+p <- ggplot(qdata)
+p <- p + geom_col(aes(x=Country,y=pros))
+p <- p + facet_grid(Variable ~ answer) +
+ theme(strip.text.y.right  = element_text(angle = 0)) 
+p
+
+
+```
+
+```{r}
+#Same with full questions and organise answers properly
+
+qdata <- qdata %>% 
+  mutate(
+    answer = fct_relevel(answer,
+                         c("Totally disagree",
+                                    "Disagree",
+                                    "Neutral",
+                                    "Agree",
+                                    "Totally agree")
+                         )
+  )
+
+p <- ggplot(qdata)
+p <- p + geom_col(aes(x=Country,y=pros))
+p <- p + facet_grid(Question ~ answer, labeller = labeller(Question = label_wrap_gen(width=25, multi_line = TRUE)) ) +
+ theme(strip.text.y.right  = element_text(angle = 0)) 
+p
+
+```
+
