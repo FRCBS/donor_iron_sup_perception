@@ -33,8 +33,7 @@ FolderName <- paste("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey
 dir.create(FolderName)
 
 # Read in each countries data
-datafi <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - FIN.RDS")
-datafi <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - NL.RDS") #
+datafi <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - FIN2.RDS")
 datanl <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - NL.RDS")
 #datafr <- readRDS("../data/countfi.RDS")
 
@@ -121,6 +120,139 @@ calculate_percentages <- function(data) {
 
 ```
 
+# Knowledge Hb
+
+```{r}
+q <- questions %>% filter(Category == "Knowledge Hb") %>% select('Variable name') %>% unlist() %>% as.vector()
+qdata <- bind_rows(
+  maketable(datafi[q],country="FI"), 
+  maketable(datanl[q],country="NL")) %>%  
+  pivot_longer(
+     cols = -c(Variable,Country) ,
+    names_to = "answer",
+    values_to = "count"
+  ) %>% 
+  left_join(
+    questions %>% select(Question,'Variable name'),
+    by = c("Variable" = "Variable name" )
+  ) %>% 
+  na.omit() %>% 
+  calculate_percentages() %>% 
+  mutate(
+    Statement = sub(".*?, then (.*)", "\\1", Question),
+    Q = sub("(.*), then.*", "\\1", Question),
+    answer = ordered(answer, levels=c("TRUE", "FALSE"))
+  )
+```
+
+```{r}
+#Faceted by answers
+p <- ggplot(qdata) + 
+  geom_col(aes(x=Country,y=percentage, fill = Country)) + 
+  facet_grid(Statement ~ answer, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
+  ylab("Percentage")+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
+  scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
+  guides(fill = FALSE)+
+  theme_bw()+
+  theme(strip.text.y.right  = element_text(angle = 0))+
+  geom_text(aes(x=Country,y=percentage, label = percentage), vjust = -0.5, size = 3)
+
+p
+
+FileName <- paste(FolderName, "/Knowledge Hb - by statement.png",sep="")
+ggsave(FileName, width = 8, height = 7)
+
+```
+
+```{r}
+#Faceted by country
+p <- ggplot(qdata) + 
+  geom_col(aes(x=answer,y=percentage, fill = Country)) + 
+  facet_grid(Statement ~ Country, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
+  ylab("Percentage")+
+  xlab(" ")+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
+  scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
+  guides(fill = FALSE)+
+  theme_bw()+
+  theme(strip.text.y.right  = element_text(angle = 0))+
+  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)
+
+p
+
+FileName <- paste(FolderName, "/Knowledge Hb - by country.png",sep="")
+ggsave(FileName, width = 8, height = 7)
+```
+
+# Knowledge Ferritin
+
+```{r}
+q <- questions %>% filter(Category == "Knowledge Ferritin/iron") %>% select('Variable name') %>% unlist() %>% as.vector()
+qdata <- bind_rows(
+  maketable(datafi[q],country="FI"), 
+  maketable(datanl[q],country="NL")) %>%  
+  pivot_longer(
+     cols = -c(Variable,Country) ,
+    names_to = "answer",
+    values_to = "count"
+  ) %>% 
+  left_join(
+    questions %>% select(Question,'Variable name'),
+    by = c("Variable" = "Variable name" )
+  ) %>% 
+  na.omit() %>% 
+  calculate_percentages() %>% 
+  mutate(
+    Statement = sub(".*?, then (.*)", "\\1", Question),
+    Q = sub("(.*), then.*", "\\1", Question),
+    answer = ordered(answer, levels=c("TRUE", "FALSE"))
+  )
+```
+
+```{r}
+#Faceted by answers
+p <- ggplot(qdata) + 
+  geom_col(aes(x=Country,y=percentage, fill = Country)) + 
+  facet_grid(Statement ~ answer, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
+  ylab("Percentage")+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
+  scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
+  guides(fill = FALSE)+
+  theme_bw()+
+  theme(strip.text.y.right  = element_text(angle = 0))+
+  geom_text(aes(x=Country,y=percentage, label = percentage), vjust = -0.5, size = 3)
+
+p
+
+FileName <- paste(FolderName, "/Knowledge Ferritin - by statement.png",sep="")
+ggsave(FileName, width = 8, height = 7)
+
+```
+```{r}
+#Faceted by country
+p <- ggplot(qdata) + 
+  geom_col(aes(x=answer,y=percentage, fill = Country)) + 
+  facet_grid(Statement ~ Country, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
+  ylab("Percentage")+
+  xlab(" ")+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
+  scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
+  guides(fill = FALSE)+
+  theme_bw()+
+  theme(strip.text.y.right  = element_text(angle = 0))+
+  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)
+
+p
+
+FileName <- paste(FolderName, "/Knowledge Ferritin - by country.png",sep="")
+ggsave(FileName, width = 8, height = 7)
+```
+
 # Perception
 
 ```{r}
@@ -153,10 +285,12 @@ p <- ggplot(qdata) +
   facet_grid(Statement ~ answer, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
   ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
   ylab("Percentage")+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
-  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
+  scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
+  guides(fill = FALSE)+
   theme_bw()+
-  theme(strip.text.y.right  = element_text(angle = 0))
+  theme(strip.text.y.right  = element_text(angle = 0))+
+  geom_text(aes(x=Country,y=percentage, label = percentage), vjust = -0.5, size = 3)
 
 p
 
@@ -173,11 +307,12 @@ p <- ggplot(qdata) +
   ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
   ylab("Percentage")+
   xlab(" ")+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
-  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
+  scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
   guides(fill = FALSE)+
   theme_bw()+
-  theme(strip.text.y.right  = element_text(angle = 0))
+  theme(strip.text.y.right  = element_text(angle = 0))+
+  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)
 
 p
 
@@ -217,29 +352,33 @@ p <- ggplot(qdata) +
   facet_grid(Statement ~ answer, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
   ggtitle(str_wrap(paste0(qdata$Q), width = 75))+
   ylab("Percentage")+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
-  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
+  scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
+  guides(fill = FALSE)+
   theme_bw()+
-  theme(strip.text.y.right  = element_text(angle = 0))
+  theme(strip.text.y.right  = element_text(angle = 0))+
+  geom_text(aes(x=Country,y=percentage, label = percentage), vjust = -0.5, size = 3)
 
 p
 
 FileName <- paste(FolderName, "/Preferences - by statement.png",sep="")
 ggsave(FileName, width = 8, height = 5)
 ```
+
 ```{r}
 #Faceted by country
 p <- ggplot(qdata) + 
   geom_col(aes(x=answer,y=percentage, fill = Country)) + 
   facet_grid(Statement ~ Country, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
-  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
+  ggtitle(str_wrap(paste0(qdata$Q), width = 75))+
   ylab("Percentage")+
   xlab(" ")+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
-  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
+  scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
   guides(fill = FALSE)+
   theme_bw()+
-  theme(strip.text.y.right  = element_text(angle = 0))
+  theme(strip.text.y.right  = element_text(angle = 0))+
+  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)
 
 p
 
@@ -279,10 +418,12 @@ p <- ggplot(qdata) +
   facet_grid(Statement ~ answer, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
   ggtitle(str_wrap(paste0(qdata$Q), width = 75))+
   ylab("Percentage")+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
-  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
+  scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
+  guides(fill = FALSE)+
   theme_bw()+
-  theme(strip.text.y.right  = element_text(angle = 0))
+  theme(strip.text.y.right  = element_text(angle = 0))+
+  geom_text(aes(x=Country,y=percentage, label = percentage), vjust = -0.5, size = 3)
 
 p
 
@@ -301,11 +442,12 @@ p <- ggplot(qdata) +
   ggtitle(str_wrap(paste0(qdata$Q), width = 75))+
   ylab("Percentage")+
   xlab("")+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100))+
-  scale_fill_manual(values = c("FI" = "deepskyblue", "NL" = "darkorange1"))+
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
+  scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
   guides(fill = FALSE)+
   theme_bw()+
-  theme(strip.text.y.right  = element_text(angle = 0))
+  theme(strip.text.y.right  = element_text(angle = 0))+
+  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)
 
 p
 

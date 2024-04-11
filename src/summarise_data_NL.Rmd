@@ -1,0 +1,997 @@
+---
+title: "Donor iron supplement perception data summary NL"
+author: "Amber Meulenbeld"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    theme: united
+---
+
+
+
+
+
+```{r setup, include=FALSE}
+#rmarkdown::render('summarise_data_NL.Rmd', clean=TRUE,output_format='html_document',output_file='L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/4. Results/summarise_data_NL.html')
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+library(tidyverse)
+library(gtsummary)
+library(likert)
+library(sjlabelled)
+library(readxl)
+
+```
+
+
+
+```{r}
+data <- readRDS("L:/DonorMedicin/FORTE/B Donor Perception Survey/B Analysis/R/2. Datasets/2a. DPS - Raw data names changed.rds")
+#We only want to look at blood donors
+data <- data %>% 
+  filter(Number_donation != "Unknown")
+
+questions <- read_excel("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/DPS Variable Overview - for summary.xlsx")
+
+mapping <- setNames(questions$Question, questions$`Variable name`)
+```
+
+# Demographics
+
+## Age
+
+```{r}
+
+p <- ggplot(data %>% filter( Sex== "Men" | Sex == "Women"))
+p <- p +  geom_histogram(aes(x=Age),binwidth = 5)
+p <- p + facet_wrap(. ~ Sex)
+p
+
+```
+
+
+Looks quite different from our normal donation population. Make explicit comparisons later.
+
+
+```{r}
+# data2<- data
+# colnames(data2) <- str_replace_all(colnames(data2),pattern = " ", "_") %>% 
+#   str_replace_all(.,".*:_","") %>% 
+#   str_replace_all(.,"\\?","") %>% 
+#   str_replace_all(.,",","")
+
+```
+
+
+```{r}
+
+table2 <-
+  tbl_summary(
+    data,
+    include = c(
+      Age,
+      Area,
+      Education,
+      Health,
+      Diet
+      ),
+    #by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table2
+```
+
+
+## Donation history
+
+```{r}
+table3 <-
+  tbl_summary(
+    data,
+    include = c(
+      Number_donation,
+      Last_donation,
+      ),
+    #by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table3
+
+```
+
+
+
+# Blood service conduct
+
+
+```{r , warning=FALSE}
+items = data %>%
+    select(which(str_detect(colnames(data) ,"OpinionBloodService")))
+
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 5
+```
+
+
+```{r , warning=FALSE}
+q10 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q10, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+# Donation symptoms
+
+## Occurence
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^Symptoms[0-9]$"))) 
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 4
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+## Severity
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^Symptoms[0-9]_Severity$"))) 
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 6
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+# Donation knowledge
+
+## General
+
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^Knowledge[0-9]$"))) %>% mutate_all(~as.factor(.))%>% mutate_all(~ factor(., levels = c(1, 2), labels = c(TRUE, FALSE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^Knowledge[0-9]_Certainty$"))) %>% mutate_all(~as.factor(.))%>% mutate_all(~ factor(., levels = c(1, 2), labels = c("50/50", "100%")))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+## Hemoglobin
+
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^KnowledgeHb[0-9]$"))) %>% mutate_all(~as.factor(.))%>% mutate_all(~ factor(., levels = c(1,2), labels = c(TRUE, FALSE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^KnowledgeHb[0-9]_Certainty$"))) %>% mutate_all(~as.factor(.))%>% mutate_all(~ factor(., levels = c(1, 2), labels = c("50/50", "100%")))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+
+
+## Ferritin
+
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^KnowledgeFer[0-9]$"))) %>% mutate_all(~as.factor(.))%>% mutate_all(~ factor(., levels = c(1,2), labels = c(TRUE, FALSE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^KnowledgeFer[0-9]_Certainty$"))) %>% mutate_all(~as.factor(.))%>% mutate_all(~ factor(., levels = c(1, 2), labels = c("50/50", "100%")))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+## Measurements
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^Measurement[0-9]$"))) %>% mutate_all(~as.factor(.))%>% mutate_all(~ factor(., levels = c(1, 2,4), labels = c("Yes", "No", "I don't know")))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 3
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+## Process
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^ConsequenceHb[0-9]$"))) %>% mutate_all(~ replace_na(., 0), ~ as.factor(.)) %>% mutate_all(~ factor(., levels = c(0,1), labels = c(FALSE, TRUE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+# Hb-deferral
+
+## Occurence
+
+```{r}
+
+data %>% count(Deferral)
+
+p <- ggplot(data %>% filter( Sex== "Men" | Sex == "Women")) +  geom_histogram(aes(x=Deferral), stat = 'count')
+p
+```
+
+```{r}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^Deferral$"))) %>% mutate_all(~ as.factor(.))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 4
+```
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Last time
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"Last_Deferral"))) %>% mutate_all(~ as.factor(.))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 6
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+## Was the information about deferral ...
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^DeferralInfo[0-9]$")))  %>% mutate_all(~ as.factor(.))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 5
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Missing information
+
+```{r}
+
+table2 <-
+  tbl_summary(
+    data,
+    include = c(
+      LackDeferralInfo1, LackDeferralInfo2, LackDeferralInfo3,LackDeferralInfo4   
+            ),
+    #by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table2
+
+
+```
+
+```{r}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^LackDeferralInfo[0-9]$")))  %>% mutate_all(~ replace_na(., 0), ~as.factor(.)) %>% mutate_all(~ factor(., levels = c(0,1), labels = c(FALSE, TRUE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Effect to motivation
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^Deferral_Motivation[0-9]$"))) 
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 5
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+# Iron deficiency 
+
+## Symptoms
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^SymptomsID[0-8]$"))) %>% mutate_all(~ replace_na(., 0), ~as.factor(.)) %>% mutate_all(~ factor(., levels = c(0,1), labels = c(FALSE, TRUE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Replacement
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^AccForIronLoss"))) %>% mutate_all(~ replace_na(., 2), ~as.factor(.)) %>% mutate_all(~ factor(., levels = c(2,1), labels = c(FALSE, TRUE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+## Information
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^DeferralSource"))) %>% mutate_all(~factor(., levels = c(2,1), labels = c(FALSE, TRUE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+# Opinion on supplements
+
+## Iron
+
+```{r , warning=FALSE}
+# items = data %>% 
+#     select(which(str_detect(colnames(data) ,"^32"))) 
+# 
+# colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+# 
+# nlevels = 5
+```
+
+
+```{r , warning=FALSE}
+# q11 <- likert(
+#   items = as.data.frame(items),
+#   nlevels = nlevels
+#   
+# )
+# plot(q11, 
+#      type = "heat",
+#      legend.position = "bottom",
+#      text.size=3,
+#      include.histogram = FALSE)
+```
+
+## Dietary
+
+
+```{r}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^SupplementsUse.NL$"))) %>% mutate_all(~case_when(.==1 ~"Never",
+                                                                                .==2 ~ "Sometimes",
+                                                                                .==3 ~ "Every day",
+                                                                                .==4 ~"Not anymore"))
+
+table2 <-
+  tbl_summary(
+    items,
+    include = c(
+      SupplementsUse.NL
+            ),
+    #by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+)%>%
+  add_n()  # add column with total number of non-missing observations
+table2
+
+```
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^Supplements[0-9]$")))%>% mutate_all(~as.factor(.))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 5
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^SupplementsReason[0-9]$"))) %>% mutate_all(~factor(., levels = c(2,1), labels = c(FALSE, TRUE)))
+
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+Are there other reasons 
+```{r}
+data %>% mutate(Q89 = case_when(Q89 == 1 ~"Yes", Q89 == 2 ~"No"))%>% count(Q89)
+```
+
+## Iron statements
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^IronSuppKnowledge[0-9]$"))) %>% mutate_all(~factor(., levels = c(2,1), labels = c(FALSE, TRUE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^IronSuppKnowledge[0-9]_Certainty$"))) %>% mutate_all(~as.factor(.))%>% mutate_all(~ factor(., levels = c(1, 2), labels = c("50/50", "100%")))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+## Iron side effects
+
+
+```{r , warning=FALSE}
+items = data%>% 
+    select(which(str_detect(colnames(data) ,"^IronSuppSE[0-9]$")))  %>% mutate_all(~ replace_na(., 2), ~as.factor(.)) %>% mutate_all(~ factor(., levels = c(2,1), labels = c(FALSE, TRUE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Iron use
+
+```{r}
+items = data%>% 
+    select(which(str_detect(colnames(data) ,"^IronSuppUse$")))  %>% mutate_all(~as.factor(.))
+table2 <-
+  tbl_summary(
+    items,
+    include = c(
+      IronSuppUse
+            ),
+  #  by = What_is_your_gender, # split table by group
+    missing = "no" # don't list missing data separately
+  ) %>%
+  add_n()  # add column with total number of non-missing observations
+table2
+
+
+```
+
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^IronSuppEffect[0-9]$"))) %>% mutate_all(~as.factor(.)) %>% mutate_all(~ factor(., levels = c(2,1), labels = c(FALSE, TRUE)))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Reaction to offering iron
+
+```{r , warning=FALSE}
+items = data%>% 
+    select(which(str_detect(colnames(data) ,"^IronSuppSanq[0-9]$"))) %>% mutate_all(~as.factor(.)) %>% mutate_all(~ factor(., levels = c(1,2,3,4,5), labels = c("Totally disagree","Disagree","Neutral","Agree","Totally agree")))
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 5
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+
+
+```{r}
+items = data%>% 
+    select(which(str_detect(colnames(data) ,"^IronSuppSanqReason$"))) %>% mutate_all(~as.factor(.)) %>% mutate_all(~ factor(., levels = c(1,2,3,4), labels = c("To improve my health","To be able to donate without delays","Other","I would never use them")))
+
+
+items %>% count(IronSuppSanqReason)
+
+```
+
+## Reason to use iron
+
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^IronDefPref[0-9]$"))) 
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 4
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+"Please drag the options in the right order, with 1 being most preferred and 4 least preferred option"
+
+
+
+## Willingness to use iron
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^IronSuppSanqCondition[0-9]$"))) %>% mutate_all(~as.factor(.)) %>% mutate_all(~ factor(., levels = c(2,1), labels = c("Disagree", "Agree")))
+
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 2
+
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+## Bases for policy
+
+
+```{r , warning=FALSE}
+items = data %>% 
+    select(which(str_detect(colnames(data) ,"^IronSuppSanqReason[0-9]$"))) 
+
+colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+
+nlevels = 5
+```
+
+
+```{r , warning=FALSE}
+q11 <- likert(
+  items = as.data.frame(items),
+  nlevels = nlevels
+  
+)
+plot(q11, 
+     type = "heat",
+     legend.position = "bottom",
+     text.size=3,
+     include.histogram = FALSE)
+```
+
+"Please drag the options in the right order, with 1 being most preferred and 5 least preferred option"
+
+

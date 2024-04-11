@@ -29,7 +29,6 @@ library(likert)
 
 ```{r}
 load("../data/donorironpercep.rdata")
-
 #We only want to look at blood donors
 data <- data %>% 
   filter(!`8: How many times have you donated whole blood in your lifetime?` == "None")
