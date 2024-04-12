@@ -52,8 +52,8 @@ datanl_common <- datanl[common_vars]
 
 
 # #filter the question metadata to what all have in common
-questions <- read_excel("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/DPS Variable Overview.xlsx")
-questions <- questions %>% inner_join(
+questions_full <- read_excel("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/DPS Variable Overview.xlsx")
+questions <- questions_full %>% inner_join(
   tibble(variablesfi=names(datafi_common)),
          by=c("Variable name"= "variablesfi")
          )
@@ -150,7 +150,6 @@ qdata <- bind_rows(
 p <- ggplot(qdata) + 
   geom_col(aes(x=Country,y=percentage, fill = Country)) + 
   facet_grid(Statement ~ answer, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
-  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
   ylab("Percentage")+
   scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
   scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
@@ -171,7 +170,6 @@ ggsave(FileName, width = 8, height = 7)
 p <- ggplot(qdata) + 
   geom_col(aes(x=answer,y=percentage, fill = Country)) + 
   facet_grid(Statement ~ Country, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
-  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
   ylab("Percentage")+
   xlab(" ")+
   scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
@@ -179,7 +177,8 @@ p <- ggplot(qdata) +
   guides(fill = FALSE)+
   theme_bw()+
   theme(strip.text.y.right  = element_text(angle = 0))+
-  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)
+  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)+
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 
 p
 
@@ -217,7 +216,6 @@ qdata <- bind_rows(
 p <- ggplot(qdata) + 
   geom_col(aes(x=Country,y=percentage, fill = Country)) + 
   facet_grid(Statement ~ answer, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
-  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
   ylab("Percentage")+
   scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
   scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
@@ -237,7 +235,6 @@ ggsave(FileName, width = 8, height = 7)
 p <- ggplot(qdata) + 
   geom_col(aes(x=answer,y=percentage, fill = Country)) + 
   facet_grid(Statement ~ Country, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
-  ggtitle(str_wrap(paste0(qdata$Q, "..."), width = 75))+
   ylab("Percentage")+
   xlab(" ")+
   scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
@@ -245,7 +242,8 @@ p <- ggplot(qdata) +
   guides(fill = FALSE)+
   theme_bw()+
   theme(strip.text.y.right  = element_text(angle = 0))+
-  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)
+  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)+
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 
 p
 
@@ -312,7 +310,8 @@ p <- ggplot(qdata) +
   guides(fill = FALSE)+
   theme_bw()+
   theme(strip.text.y.right  = element_text(angle = 0))+
-  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)
+  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)+
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 
 p
 
@@ -323,22 +322,23 @@ ggsave(FileName, width = 8, height = 7)
 # Preferences 
 
 ```{r}
-q <- questions %>% filter(Category == "Preferred consequence of low iron") %>% select('Variable name') %>% unlist() %>% as.vector()
+q1 <- questions_full %>% filter(Category == "Preferred consequence of low iron") %>% select('Variable name') %>% unlist() %>% as.vector()
+q2 <- questions %>% filter(Category == "Preferred consequence of low iron") %>% select('Variable name') %>% unlist() %>% as.vector()
 qdata <- bind_rows(
-  maketable(datafi[q],country="FI"), 
-  maketable(datanl[q],country="NL")) %>%  
+  maketable(datafi[q1],country="FI"), 
+  maketable(datanl[q2],country="NL")) %>%  
   pivot_longer(
      cols = -c(Variable,Country) ,
     names_to = "answer",
     values_to = "count"
   ) %>% 
   left_join(
-    questions %>% select(Question,'Variable name'),
+    questions_full %>% select(Question,'Variable name'),
     by = c("Variable" = "Variable name" )
   ) %>% 
   na.omit() %>% 
   calculate_percentages() %>% 
-  mutate(Statement = sub(".*?\\?(.*)", "\\1", Question), Q = sub("(.*?\\?.*?)\\s.*", "\\1", Question)
+  mutate(Statement = sub(".*?\\?(.*)", "\\1", Question), Q = sub("(.*?\\?.*?)\\s.*", "\\1", Question), Statement = factor(Statement, levels = c(" A longer interval between donations to replenish my iron stores.", " Dietary advice to potentially be able to donate at my regular donation interval.", " Provision of iron supplements by the blood service to be able to donate at my regular donation interval.", " Stop donating completely.", " None of these options, I prefer to keep on donating"))
 )
 ```
 
@@ -369,16 +369,17 @@ ggsave(FileName, width = 8, height = 5)
 #Faceted by country
 p <- ggplot(qdata) + 
   geom_col(aes(x=answer,y=percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE))) +
+  facet_grid(Statement ~ Country, labeller = labeller(Statement = label_wrap_gen(width=25, multi_line = TRUE)), scales = "free_x") +
   ggtitle(str_wrap(paste0(qdata$Q), width = 75))+
   ylab("Percentage")+
-  xlab(" ")+
+  xlab("Most preferred to least preferred")+
   scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120))+
   scale_fill_manual(values = c("FI" = "#228b22", "NL" = "#FF9B00"))+
   guides(fill = FALSE)+
   theme_bw()+
   theme(strip.text.y.right  = element_text(angle = 0))+
-  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)
+  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)+
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 
 p
 
@@ -447,7 +448,8 @@ p <- ggplot(qdata) +
   guides(fill = FALSE)+
   theme_bw()+
   theme(strip.text.y.right  = element_text(angle = 0))+
-  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)
+  geom_text(aes(x=answer,y=percentage, label = percentage), vjust = -0.5, size = 3)+
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 
 p
 
