@@ -246,7 +246,8 @@ names(data) <- gsub("^Q40_7$", "IronSuppSanq7", names(data))
 names(data) <- gsub("^Q40_8$", "IronSuppSanq8", names(data))
 names(data) <- gsub("^Q40_9$", "IronSuppSanq9", names(data))
 
-names(data) <- gsub("^Q41$", "IronSuppSanqReason", names(data))
+names(data) <- gsub("^Q41$", "IronSuppSanqReason", names(data)) #IronSupp_BloodService
+
 names(data) <- gsub("^Q41_3_TEXT$", "IronSuppSanqReasonB", names(data))
 names(data) <- gsub("^Q77_1$", "IronDefPref1", names(data))
 names(data) <- gsub("^Q77_2$", "IronDefPref2", names(data))
@@ -382,11 +383,11 @@ f7 <- function(x) {
   x
 }
 
-f8 <- function (x){
+f8 <- function (x){ #HIER AANPASSEN
   x <- fct_recode(x,  
-                  "Increased" = "something_in_some_language",
-                  "No effect" = "something_in_some_language",
-                  "Decreased" = "something_in_some_language"
+                  "Increased" = "3",
+                  "No effect" = "2",
+                  "Decreased" = "1"
   )
   x <- factor(
     x,
@@ -399,7 +400,6 @@ f9 <- function (x){
   x <- fct_recode(x,
                   "Agree" = "1",
                   "Disagree" = "2"
-                  
                   )
   x <- factor(
     x,
@@ -441,7 +441,8 @@ tmp <- data %>%
   mutate_at(vars(which(colnames(data) %in% c("Knowledge1","Knowledge2","Knowledge3","Knowledge4","KnowledgeHb1","KnowledgeHb2","KnowledgeHb3","KnowledgeHb4","KnowledgeFer1","KnowledgeFer2","KnowledgeFer3","KnowledgeFer4","IronSuppKnowledge1","IronSuppKnowledge2","IronSuppKnowledge3","IronSuppKnowledge4"))), ~ f4(.)) %>% 
   mutate_at(vars(which(str_detect(colnames(data), "_Certainty"))), ~ f5(.)) %>% 
   mutate_at(vars(which(colnames(data) %in% c("AccForIronLoss", "SupplementsUse.NL", "SupplementsOpen", "SupplementsReason6A"))), ~ f6(.))%>% 
-  mutate_at(vars(which(str_detect(colnames(data), "\\bConsequenceHb1\\b|\\bConsequenceHb2\\b|\\bConsequenceHb3\\b|\\bConsequenceHb4\\b|\\bConsequenceHb5\\b|\\bConsequenceHb6\\b|\\bConsequenceHb7\\b|\\bConsequenceFer1\\b|\\bConsequenceFer2\\b|\\bConsequenceFer3\\b|\\bConsequenceFer4\\b|\\bConsequenceFer5\\b|\\bConsequenceFer6\\b|\\bConsequenceFer7\\b|\\bSymptomsID1\\b|\\bSymptomsID2\\b|\\bSymptomsID3\\b|\\bSymptomsID4\\b|\\bSymptomsID5\\b|\\bSymptomsID6\\b|\\bSymptomsID7\\b|\\bSymptomsID8\\b|\\bSymptomsID9\\b|\\bAccForIronLoss1\\b|\\bAccForIronLoss2\\b|\\bAccForIronLoss3\\b|\\bAccForIronLoss4A\\b|\\bDeferralSource1\\b|\\bDeferralSource2.NL\\b|\\bDeferralSource3\\b|\\bDeferralSource4\\b|\\bDeferralSource5\\b|\\bDeferralSource6A\\b|\\bSupplementsUse1A.NL\\b|\\bSupplementsUse2A.NL\\b|\\bSupplementsUse3A.NL\\b|\\bSupplementsReason1\\b|\\bSupplementsReason2\\b|\\bSupplementsReason3\\b|\\bSupplementsReason4\\b|\\bSupplementsReason5\\b|\\bIronSuppKnowledge1\\b|\\bIronSuppKnowledge2\\b|\\bIronSuppKnowledge3\\b|\\bIronSuppKnowledge4\\b|\\bIronSuppSE1\\b|\\bIronSuppSE2\\b|\\bIronSuppSE3\\b|\\bIronSuppSE4\\b|\\bIronSuppSE5\\b|\\bIronSuppSE6\\b|\\bIronSuppSE7.NL\\b|\\bIronSuppSE8\\b|\\bIronSuppSE9\\b|\\bIronSuppEffect1\\b|\\bIronSuppEffect2\\b|\\bIronSuppEffect3\\b|\\bIronSuppEffect4\\b|\\bIronSuppEffect5\\b|\\bIronSuppEffect6A\\b"))), ~ f7(.)) %>% 
+  mutate_at(vars(which(str_detect(colnames(data), "\\bConsequenceHb1\\b|\\bConsequenceHb2\\b|\\bConsequenceHb3\\b|\\bConsequenceHb4\\b|\\bConsequenceHb5\\b|\\bConsequenceHb6\\b|\\bConsequenceHb7\\b|\\bConsequenceFer1\\b|\\bConsequenceFer2\\b|\\bConsequenceFer3\\b|\\bConsequenceFer4\\b|\\bConsequenceFer5\\b|\\bConsequenceFer6\\b|\\bConsequenceFer7\\b|\\bSymptomsID1\\b|\\bSymptomsID2\\b|\\bSymptomsID3\\b|\\bSymptomsID4\\b|\\bSymptomsID5\\b|\\bSymptomsID6\\b|\\bSymptomsID7\\b|\\bSymptomsID8\\b|\\bSymptomsID9\\b|\\bAccForIronLoss1\\b|\\bAccForIronLoss2\\b|\\bAccForIronLoss3\\b|\\bAccForIronLoss4A\\b|\\bDeferralSource1\\b|\\bDeferralSource2.NL\\b|\\bDeferralSource3\\b|\\bDeferralSource4\\b|\\bDeferralSource5\\b|\\bDeferralSource6A\\b|\\bSupplementsUse1A.NL\\b|\\bSupplementsUse2A.NL\\b|\\bSupplementsUse3A.NL\\b|\\bSupplementsReason1\\b|\\bSupplementsReason2\\b|\\bSupplementsReason3\\b|\\bSupplementsReason4\\b|\\bSupplementsReason5\\b|\\bIronSuppKnowledge1\\b|\\bIronSuppKnowledge2\\b|\\bIronSuppKnowledge3\\b|\\bIronSuppKnowledge4\\b|\\bIronSuppSE1\\b|\\bIronSuppSE2\\b|\\bIronSuppSE3\\b|\\bIronSuppSE4\\b|\\bIronSuppSE5\\b|\\bIronSuppSE6\\b|\\bIronSuppSE7.NL\\b|\\bIronSuppSE8\\b|\\bIronSuppSE9\\b|"))), ~ f7(.)) %>% 
+  mutate_at(vars(which(str_detect(colnames(data), "\\bIronSuppEffect1\\b|\\bIronSuppEffect2\\b|\\bIronSuppEffect3\\b|\\bIronSuppEffect4\\b|\\bIronSuppEffect5\\b|\\bIronSuppEffect6A\\b|"))), ~f8(.)) %>%
   mutate_at(vars(which(colnames(data) %in% c("IronSuppSanqCondition1", "IronSuppSanqCondition2", "IronSuppSanqCondition3", "IronSuppSanqCondition4", "IronSuppSanqCondition5", "IronSuppSanqCondition6"))), ~ f9(.)) %>%
   mutate_at(vars(which(str_detect(colnames(data), "\\bSymptoms1_Severity\\b|\\bSymptoms2_Severity\\b|\\bSymptoms3_Severity\\b|\\bSymptoms4_Severity\\b|\\bSymptoms5_Severity\\b|\\bSymptoms6_Severity\\b|\\bSymptoms7_Severity\\b|\\bSymptoms8_Severity\\b|\\bSymptoms9_Severity\\b|\\bSymptoms10_Severity\\b|\\bDeferral\\b|\\bLast_Deferral\\b|\\bDeferralInfo1\\b|\\bDeferralInfo2\\b|\\bDeferralInfo3\\b|\\bDeferralInfo4\\b|\\bDeferralInfo5\\b|\\bLackDeferralInfoTEXT\\b|\\bDeferral_Motivation1\\b|\\bDeferral_Motivation2\\b|\\bDeferralSource6B\\b|\\bSupplements1\\b|\\bSupplements2\\b|\\bSupplements3\\b|\\bSupplements4\\b|\\bIronSuppSanqReason\\b|\\bIronSuppSanqReasonB.NL\\b|\\bIronDefPref1\\b|\\bIronDefPref2\\b|\\bIronDefPref3\\b|\\bIronDefPref4\\b|\\bIronSuppSanqReason1\\b|\\bIronSuppSanqReason2\\b|\\bIronSuppSanqReason3\\b|\\bIronSuppSanqReason4\\b|\\bIronSuppSanqReason5\\b|\\bDeferral_Motivation1\\b|\\bDeferral_Motivation2\\b"))), ~ f11(.))
 
@@ -572,7 +573,7 @@ IronSuppSanqReason =
              "Different reason"   =  "3", 
              "I would never make use of iron supplements provided by the blood service"  =  "4"
              
-  ),
+  )
 
 
 
@@ -828,7 +829,7 @@ Summary_NL <- dfSummary(tmp,
 ```{r}
 
 
-datanl <- saveRDS("../data/countfi.RDS")
+datanl <- saveRDS("../data/countnl.RDS")
 
 
 
