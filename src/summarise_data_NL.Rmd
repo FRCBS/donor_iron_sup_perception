@@ -172,9 +172,22 @@ plot(q11,
 items = data %>% 
     select(which(str_detect(colnames(data) ,"^Symptoms[0-9]_Severity$"))) 
 
-colnames(items) <- unname(mapping[match(colnames(items), names(mapping))])
+# Separate the question and answer
+questions_and_answers <- colnames(items)
 
-nlevels = 6
+# Split the column names to isolate the answers
+split_colnames <- strsplit(questions_and_answers, "\\? ") # Split by the question mark followed by a space
+
+# Extract the common question (assuming all columns share the same question)
+question <- unique(sapply(split_colnames, `[`, 1))
+
+# Extract only the answers (the part after the question)
+answers <- sapply(split_colnames, `[`, 2)
+
+# Update the column names with just the answers
+colnames(items) <- answers
+
+nlevels = 5
 
 ```
 

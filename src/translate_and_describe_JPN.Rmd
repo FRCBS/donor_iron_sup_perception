@@ -776,6 +776,65 @@ f11 <- function (x){
   x
 }
 
+f12 <- function (x){
+  x <- fct_recode(x,  
+                  "1" = "Never experienced",
+                  "2" = "Very mild",
+                  "3" = "Mild",
+                  "4" = "Moderate",
+                  "5" = "Difficult/tangible",
+  )
+  x <- factor(
+    x,
+    levels=c("1","2","3","4","5"),
+  )
+  x
+}
+
+f13 <- function (x){
+  x <- fct_recode(x,  
+                  "1" = "Not at all",
+                  "2" = "A little bit",
+                  "3" = "To some extent",
+                  "4" = "Mostly",
+                  "5" = "Completely",
+  )
+  x <- factor(
+    x,
+    levels=c("1","2","3","4","5"),
+  )
+  x
+}
+
+f14 <- function (x){
+  x <- fct_recode(x,  
+                  "1" = "Decreased my willingness to give blood",
+                  "2" = "Slightly decreased my willingness to give blood",
+                  "3" = "No effect",
+                  "4" = "Made me distinctly more inclined to leave blood",
+                  "5" = "Decreased my willingness to give blood",
+  )
+  x <- factor(
+    x,
+    levels=c("1","2","3","4","5"),
+  )
+  x
+}
+
+f15 <- function (x){
+  x <- fct_recode(x,  
+                  "1" = "Not at all",
+                  "2" = "A little",
+                  "3" = "Means",
+                  "4" = "Mostly",
+                  "5" = "Completely",
+  )
+  x <- factor(
+    x,
+    levels=c("1","2","3","4","5"),
+  )
+  x
+}
 
 ```
 
@@ -816,7 +875,7 @@ FTcols <- data %>%
 # #49 has scale from 1-6. But if there are no 6s then it is detected here and ruins things later
 # 
 
-cols12345 <- c("Symptoms1_Severity","Symptoms2_Severity","Symptoms3_Severity","Symptoms4_Severity","Symptoms5_Severity", "Symptoms6_Severity", "Symptoms7_Severity", "Symptoms8_Severity", "Symptoms9_Severity", "Symptoms10_Severity", "DeferralInfo1","DeferralInfo2", "DeferralInfo3", "DeferralInfo4", "DeferralInfo5", "Deferral_Motivation1", "Deferral_Motivation2", "DeferralSource1_Confidence.FI", "DeferralSource3_Confidence.FI", "DeferralSource4_Confidence.FI", "DeferralSource5_Confidence.FI", "DeferralSource6_Confidence.FI", "Supplements1", "Supplements2", "Supplements3", "Supplements4", "IronSuppSanq1", "IronSuppSanq2", "IronSuppSanq3", "IronSuppSanq4", "IronSuppSanq5", "IronSuppSanq6", "IronSuppSanq7", "IronSuppSanq8", "IronSuppSanq9", "IronDefPref1",  "IronDefPref2", "IronDefPref3", "IronDefPref4", "IronDefPref5")
+cols12345 <- c( "Deferral_Motivation1", "Deferral_Motivation2", "DeferralSource1_Confidence.FI", "DeferralSource3_Confidence.FI", "DeferralSource4_Confidence.FI", "DeferralSource5_Confidence.FI", "DeferralSource6_Confidence.FI", "Supplements1", "Supplements2", "Supplements3", "Supplements4", "IronSuppSanq1", "IronSuppSanq2", "IronSuppSanq3", "IronSuppSanq4", "IronSuppSanq5", "IronSuppSanq6", "IronSuppSanq7", "IronSuppSanq8", "IronSuppSanq9", "IronDefPref1",  "IronDefPref2", "IronDefPref3", "IronDefPref4", "IronDefPref5")
 
 cols16 <- c(
   "IronSuppSanqReason1", "IronSuppSanqReason2",  "IronSuppSanqReason3", "IronSuppSanqReason5",  "IronSuppSanqReason4.FI",  "IronSuppSanqReason6.FI" )
@@ -831,10 +890,15 @@ tmp <- data %>%
   mutate_at(vars(which(str_detect(colnames(data) ,"_Certainty"))), ~ f5(.) ) %>%
   #here instead of a regular expression, above a vector is made which tells which columns to process
   mutate_at(vars(which(as.logical(yesandnocols))), ~ f6(.) ) %>%
-  mutate_at(vars(which(as.logical(zero1cols))), ~ f7(.) ) %>%mutate_at(vars(which(str_detect(colnames(data), "\\bIronSuppEffect2\\b|\\bIronSuppEffect3\\b|\\bIronSuppEffect4\\b|\\bIronSuppEffect5\\b|\\bIronSuppEffect6A\\b"))), ~ f8(.))  %>%
+  mutate_at(vars(which(as.logical(zero1cols))), ~ f7(.) ) %>%
+  mutate_at(vars(which(str_detect(colnames(data), "\\bIronSuppEffect2\\b|\\bIronSuppEffect3\\b|\\bIronSuppEffect4\\b|\\bIronSuppEffect5\\b|\\bIronSuppEffect6A\\b"))), ~ f8(.))  %>%
   mutate_at(vars(which(str_detect(colnames(data) ,"IronSuppSanqCondition"))), ~ f9(.) ) %>%
   mutate_at(vars(which(as.logical(cols16))), ~ f10(.) ) %>%
   mutate_at(vars(match(cols12345, colnames(data))), ~ f11(.)) %>%
+  mutate_at(vars(which(str_detect(colnames(data) ,"Severity"))), ~ f12(.) ) %>%
+  mutate_at(vars(which(str_detect(colnames(data), "\\bDeferralInfo1\\b|\\bDeferralInfo2\\b|\\bDeferralInfo3\\b|\\bDeferralInfo4\\b|\\bDeferralInfo5\\b"))), ~ f13(.))  %>%
+  mutate_at(vars(which(str_detect(colnames(data), "\\bDeferral_Motivation1\\b|\\bDeferral_Motivation2\\b|"))), ~ f14(.))  %>%
+  mutate_at(vars(which(str_detect(colnames(data) ,"Confidence"))), ~ f15(.) ) %>%
   
   mutate(
     Sex =  fct_recode(Sex,  
