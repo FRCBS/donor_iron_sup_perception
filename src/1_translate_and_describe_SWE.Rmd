@@ -576,6 +576,11 @@ data <- data %>%
                 ~ case_when(
                     . == "Yes" ~ TRUE,
                     . == "No"  ~ FALSE  # Leave other values unchanged if any
+                ))) %>%
+  mutate(across(matches("^DeferralSource[0-8]$"),
+                ~ case_when(
+                    . == "Yes" ~ TRUE,
+                    . == "No"  ~ FALSE  # Leave other values unchanged if any
                 )))
 #Ironsuppknowledge_certainty
 data <- data %>%
@@ -675,7 +680,7 @@ f6 <- function (x){
                   )
   x <- factor(
     x,
-    levels=c(FALSE,TRUE),
+    levels=c("No","Yes"),
   )
   x
 }

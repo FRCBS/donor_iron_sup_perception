@@ -1,0 +1,123 @@
+---
+title: "Survey Results"
+output: 
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: true
+---
+
+```{r, include=F, warning=F}
+#rmarkdown::render("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/1. R Scripts/src/summary_by_country.Rmd", clean=TRUE,output_format='html_document',output_file='L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/4. Results/summary_by_country.html')
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(stringr)  # For wrapping long titles
+
+# Load the combined dataset and question text
+df <- readRDS("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/combined.RDS")
+question_text <- read.csv("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/questions.csv")
+
+# Remove ".FI" from question names in both df and question_text
+df$Question <- gsub("\\.FI$", "", df$Question)
+question_text$Variable <- gsub("\\.FI$", "", question_text$Variable)
+
+# Clean up and prepare the question_text dataset
+question_text <- question_text %>%
+  distinct(Variable, .keep_all = TRUE) %>%
+  filter(Variable %in% df$Question)
+
+# Merge df and question_text based on df$Question and question_text$Variable
+df <- merge(df, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE)
+
+# Filter rows where all countries have TRUE in the presence columns
+presence_columns <- c("NL", "FR", "SWE", "FIN", "JPN")
+df <- df %>% filter(across(all_of(presence_columns), ~ . == TRUE))
+
+# Replace country codes with actual country names
+country_mapping <- c("NL" = "Netherlands", "FR" = "France", "SWE" = "Sweden", 
+                     "FIN2" = "Finland", "JPN" = "Japan")
+df$Country <- country_mapping[df$country]
+
+# Set up a new color palette for countries
+country_colors <- c(
+  "Netherlands" = "#FF6600", # Orange for NL
+  "France" = "#1E90FF",      # Blue for France
+  "Sweden" = "#FFD700",      # Yellow for Sweden
+  "Finland" = "#0000FF",     # Blue for Finland
+  "Japan" = "#FF0000"        # Red for Japan
+)
+
+# Ensure the Country and Response columns are treated as factors
+df$Country <- as.factor(df$Country)
+df$Response <- as.factor(df$Response)
+
+# Extract unique questions
+questions <- sort(unique(df$Question))
+```
+
+```{r plots, warning = F, results="asis", echo=FALSE, include= T, results="asis"}
+# Initialize a vector to keep track of processed main questions
+processed_questions <- c()
+
+# Loop over each question
+for (question in questions) {
+  
+  # Retrieve the corresponding Question_Text for the current question
+  question_text_value <- question_text %>%
+    filter(Variable == question) %>%
+    pull(Question_Text)
+
+  # Handle cases where Question_Text is missing
+  if (length(question_text_value) == 0 || is.na(question_text_value)) {
+    question_text_value <- "Unknown Question"
+  }
+
+  # Split the question text by either ':' or '?'
+  split_question <- unlist(strsplit(question_text_value, "[:?]"))
+  main_question <- trimws(split_question[1])  # First part
+  sub_question <- trimws(split_question[2])    # Second part (if it exists)
+
+  # Check if the main question has already been processed
+  if (!main_question %in% processed_questions) {
+    # Print the main question as a first-level header (for TOC)
+    cat(paste0("# ", main_question, "\n\n"))
+    # Mark this question as processed
+    processed_questions <- c(processed_questions, main_question)
+  }
+
+  # Print the sub-question as a second-level header (for TOC), if it exists
+  if (!is.na(sub_question) && nchar(sub_question) > 0) {
+    cat(paste0("## ", sub_question, "\n\n"))
+  }
+
+  # Filter the data for the current question
+  data_filtered <- df %>%
+    filter(Question == question) %>%
+    group_by(Country, Response) %>%
+    summarise(Count = sum(Count), .groups = 'drop') %>%
+    group_by(Country) %>%
+    mutate(Percentage = 100 * Count / sum(Count))
+  
+  # Wrap long response labels
+  data_filtered$Response <- str_wrap(as.character(data_filtered$Response), width = 30)
+
+  # Create the plot
+  p <- ggplot(data_filtered, aes(x = Response, y = Percentage, fill = Country)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    facet_wrap(~ Country, scales = "free_y") +
+    scale_fill_manual(values = country_colors) +
+    labs(title = main_question, x = "Response", y = "Percentage") +
+    coord_flip() +
+    theme_light() +
+    theme(legend.position = "none",
+          axis.text.y = element_text(angle = 0, hjust = 1),
+          plot.title = element_text(size = 14)) +
+    scale_y_continuous(labels = scales::percent_format(scale = 1))
+
+  # Print the plot
+  print(p)
+  
+    # Ensure proper spacing after each plot
+  cat("\n\n")  # Add additional line breaks after each plot for spacing
+}

@@ -1024,13 +1024,13 @@ saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Su
 
 
 ```{r}
-dfSummary(data,
-          plain.ascii = FALSE, 
-          style = "grid", 
-          graph.col = TRUE,
-          graph.magnif = 0.75, 
-          valid.col = FALSE, 
-          tmp.img.dir = "/tmp")
+# dfSummary(data,
+#           plain.ascii = FALSE, 
+#           style = "grid", 
+#           graph.col = TRUE,
+#           graph.magnif = 0.75, 
+#           valid.col = FALSE, 
+#           tmp.img.dir = "/tmp")
 
 
 datajpn <- saveRDS(tmp, file = "L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - JPN/datajpn.RDS")

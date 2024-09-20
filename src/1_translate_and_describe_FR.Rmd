@@ -177,11 +177,11 @@ names(data) <- gsub("How do you take into account the amount of iron you lose", 
 
 # Deferral information sources
 names(data) <- gsub("What information source have you used..", "DeferralSource", names(data))
-names(data) <- gsub("Trust about the information from the EFS", "DeferralSource_Trust1", names(data))
-names(data) <- gsub("From you GP", "DeferralSource_Trust2", names(data))
-names(data) <- gsub("From BS website", "DeferralSource_Trust3", names(data))
-names(data) <- gsub("From other internet sources", "DeferralSource_Trust4", names(data))
-names(data) <- gsub("Others", "DeferralSource_Trust5", names(data))
+names(data) <- gsub("Trust about the information from the EFS", "DeferralSource1_Confidence.FI", names(data))
+names(data) <- gsub("From you GP", "DeferralSource2_Confidence.FI", names(data))
+names(data) <- gsub("From BS website", "DeferralSource3_Confidence.FI", names(data))
+names(data) <- gsub("From other internet sources", "DeferralSource4_Confidence.FI", names(data))
+names(data) <- gsub("Others", "DeferralSource5_Confidence.FI", names(data))
 
 # Attitude toward iron supplements (should have been supplements in general)
 names(data) <- gsub("I think iron supplement are bad good", "IronSupplements1", names(data))
@@ -431,14 +431,14 @@ data <- data %>% select(-"ConsequenceFer")
 data <- data %>%
   mutate(
     # Create binary columns for each predefined answer option using regex to match the content
-    SymptomsID1 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Restless syndrome\\.", x), 1, 0)),
-    SymptomsID2 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Dark stools\\.", x), 1, 0)),
-    SymptomsID3 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Tiredness\\.", x), 1, 0)),
-    SymptomsID4 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Stomach discomfort_pain\\.", x), 1, 0)),
-    SymptomsID5 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Pica\\.", x), 1, 0)),
-    SymptomsID6 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Headache\\.", x), 1, 0)),
-    SymptomsID7 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("None of these\\.", x), 1, 0)),
-    SymptomsID8 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("I dont know\\.", x), 1, 0))
+    SymptomsID1 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Restless syndrome", x), 1, 0)),
+    SymptomsID2 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Dark stools", x), 1, 0)),
+    SymptomsID3 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Tiredness", x), 1, 0)),
+    SymptomsID4 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Stomach discomfort_pain", x), 1, 0)),
+    SymptomsID5 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Pica", x), 1, 0)),
+    SymptomsID6 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("Headache", x), 1, 0)),
+    SymptomsID7 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("None of these", x), 1, 0)),
+    SymptomsID8 = sapply(as.character(SymptomsID), function(x) ifelse(grepl("I dont know", x), 1, 0))
   )
 
 data <- data %>% select(-"SymptomsID")
@@ -1054,13 +1054,13 @@ saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Su
 ```
 
 ```{r}
-dfSummary(data,
-          plain.ascii = FALSE, 
-          style = "grid", 
-          graph.col = TRUE,
-          graph.magnif = 0.75, 
-          valid.col = FALSE, 
-          tmp.img.dir = "/tmp")
+# dfSummary(data,
+#           plain.ascii = FALSE, 
+#           style = "grid", 
+#           graph.col = TRUE,
+#           graph.magnif = 0.75, 
+#           valid.col = FALSE, 
+#           tmp.img.dir = "/tmp")
 
 
 datafr <- saveRDS(tmp, file = "L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - FR/datafr.RDS")
