@@ -1,5 +1,6 @@
 files <- list.files("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/individual", full.names = T)
 files<-files[!file.info(files)$isdir]
+print(files)
 
 country_codes <- sapply(files, function(x) {
   parts <- strsplit(x, " - ")[[1]]
@@ -43,7 +44,7 @@ write.csv(final_df, paste0("C:/Users/meule01a/OneDrive - Sanquin/A12 Project Per
 saveRDS(final_df, file=paste0("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/rds/",country_codes[i],".RDS"))
 }
 
-files <- list.files("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/individual/rds", full.names = T)
+files <- list.files("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/rds", full.names = T)
 files<-files[!file.info(files)$isdir]
 
 file_list <- lapply(files, readRDS)

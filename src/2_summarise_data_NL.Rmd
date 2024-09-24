@@ -13,7 +13,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-#rmarkdown::render('summarise_data_NL.Rmd', clean=TRUE,output_format='html_document',output_file='L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/4. Results/summarise_data_NL.html')
+#rmarkdown::render('2_summarise_data_NL.Rmd', clean=TRUE,output_format='html_document',output_file='L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/4. Results/summarise_data_NL.html')
 
 knitr::opts_chunk$set(
 	echo = TRUE,

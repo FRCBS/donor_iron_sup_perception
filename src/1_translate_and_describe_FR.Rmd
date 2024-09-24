@@ -226,9 +226,9 @@ names(data) <- gsub("Other...122", "IronSuppEffect6B", names(data))
 names(data) <- gsub("...123", "IronSuppEffect6A", names(data))
 
 # Concerns iron supplements
-names(data) <- gsub("Do you have any concerns about iron supplements", "Concerns_IronSupp", names(data))
-names(data) <- gsub("Do you have other concerns about iron supplements", "Concerns_IronSupp_Other", names(data))
-names(data) <- gsub("If yes, what cooncerns", "Concerns_IronSupp_Other_Text", names(data))
+names(data) <- gsub("Do you have any concerns about iron supplements", "Concern_IronSupp", names(data))
+names(data) <- gsub("Do you have other concerns about iron supplements", "Concern_IronSupp_Other", names(data))
+names(data) <- gsub("If yes, what cooncerns", "Concern_IronSupp_Other_Text", names(data))
 
 # Perception
 names(data) <- gsub("If the EFS would offer iron supplements, then", "IronSupp_BloodService", names(data))
@@ -552,16 +552,16 @@ data <- data %>% select(-"IronSuppSE")
 data <- data %>%
   mutate(
     # Create binary columns for each predefined answer option using regex to match the content
-    ConcernsIronSupp1 = sapply(as.character(Concerns_IronSupp), function(x) ifelse(grepl("I dont know if iron supplements can be harmfull", x), 1, 0)),
-    ConcernsIronSupp2 = sapply(as.character(Concerns_IronSupp), function(x) ifelse(grepl("I will not take iron supplements unless I have symptoms", x), 1, 0)),
-    ConcernsIronSupp3 = sapply(as.character(Concerns_IronSupp), function(x) ifelse(grepl("I think that iron supplements are harmfull", x), 1, 0)),
-    ConcernsIronSupp4 = sapply(as.character(Concerns_IronSupp), function(x) ifelse(grepl("I prefer to eat more iron rather than taking iron supplements", x), 1, 0)),
-    ConcernsIronSupp5A = sapply(as.character(Concerns_IronSupp_Other), function(x) ifelse(grepl("YES", x), 1, 0)),
+    ConcernIronSupp1 = sapply(as.character(Concern_IronSupp), function(x) ifelse(grepl("I dont know if iron supplements can be harmfull", x), 1, 0)),
+    ConcernIronSupp2 = sapply(as.character(Concern_IronSupp), function(x) ifelse(grepl("I will not take iron supplements unless I have symptoms", x), 1, 0)),
+    ConcernIronSupp3 = sapply(as.character(Concern_IronSupp), function(x) ifelse(grepl("I think that iron supplements are harmfull", x), 1, 0)),
+    ConcernIronSupp4 = sapply(as.character(Concern_IronSupp), function(x) ifelse(grepl("I prefer to eat more iron rather than taking iron supplements", x), 1, 0)),
+    ConcernIronSupp5A = sapply(as.character(Concern_IronSupp_Other), function(x) ifelse(grepl("YES", x), 1, 0)),
     
-        ConcernsIronSupp5B = Concerns_IronSupp_Other_Text
+        ConcernIronSupp5B = Concern_IronSupp_Other_Text
   )
 
-data <- data %>% select(-c("Concerns_IronSupp", "Concerns_IronSupp_Other", "Concerns_IronSupp_Other_Text"))
+data <- data %>% select(-c("Concern_IronSupp", "Concern_IronSupp_Other", "Concern_IronSupp_Other_Text"))
 
 #Iron supplementation reasoning use
 
@@ -1042,14 +1042,14 @@ IronSupp_BloodService = fct_recode(as.factor(IronSupp_BloodService),
 # remove the open text answers for making the summary
 ```{r}
 tmp <- tmp %>%
-  select(-c("SupplementsUse_Type_A","SupplementsUse_Type_B","SupplementsUse_Type_C","AccForIronLoss4B","LackDeferralInfoTEXT","DeferralSource6B","SupplementsReason6B","IronSuppSanqReasonB","ConcernsIronSupp5B","IronSuppEffect6B", "SupplementsOpen1", "SupplementsOpen2"))
+  select(-c("SupplementsUse_Type_A","SupplementsUse_Type_B","SupplementsUse_Type_C","AccForIronLoss4B","LackDeferralInfoTEXT","DeferralSource6B","SupplementsReason6B","IronSuppSanqReasonB","ConcernIronSupp5B","IronSuppEffect6B", "SupplementsOpen1", "SupplementsOpen2"))
 ```
 
 # Summarise 
 ```{r}
 #Export summary count data
 DataExport <- apply(tmp,MARGIN = 2,FUN = table)
-saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - FR.RDS")
+saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/individual/1. iDPS - Summary data - FR.RDS")
 
 ```
 

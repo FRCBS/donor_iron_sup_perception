@@ -577,7 +577,7 @@ data <- data %>%
                     . == "Yes" ~ TRUE,
                     . == "No"  ~ FALSE  # Leave other values unchanged if any
                 ))) %>%
-  mutate(across(matches("^DeferralSource[0-8]$"),
+  mutate(across(matches("^DeferralSource([0-8]|6A)$"),
                 ~ case_when(
                     . == "Yes" ~ TRUE,
                     . == "No"  ~ FALSE  # Leave other values unchanged if any
@@ -995,7 +995,7 @@ tmp <- tmp %>%
 ```{r}
 #Export summary count data
 DataExport <- apply(tmp,MARGIN = 2,FUN = table)
-saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - SWE.RDS")
+saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/individual/1. iDPS - Summary data - SWE.RDS")
 
 ```
 

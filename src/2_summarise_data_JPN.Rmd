@@ -10,7 +10,7 @@ output:
 
 ```{r include=FALSE}
 #run code below in console:
- # rmarkdown::render('L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/1. R Scripts/src/summarise_data_JPN.Rmd', clean=TRUE,output_format='html_document',output_file='L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/4. Results/summarise_data_JPN.html') 
+ # rmarkdown::render('L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/1. R Scripts/src/2_summarise_data_JPN.Rmd', clean=TRUE,output_format='html_document',output_file='L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/4. Results/summarise_data_JPN.html') 
 
 knitr::opts_chunk$set(
 	echo = TRUE,

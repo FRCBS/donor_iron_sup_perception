@@ -1,6 +1,6 @@
 ---
-title: "Donor iron supplement perception study data description and translation - Finland"
-author: "Mikko Arvas"
+title: "Donor iron supplement perception study data description and translation - Netherlands"
+author: "Amber Meulenbeld"
 date: "`r Sys.time()`"
 output:
   html_document:
@@ -282,6 +282,16 @@ data <- data %>%
                             labels = c("17-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80"),
                             right = TRUE, # Include the upper bound in the intervals
                             include.lowest = TRUE)) # Include the lowest value in the first interval
+
+#LackDeferralInfo
+data <- data %>% mutate_at(vars(matches("^LackDeferralInfo[1-4]$")), ~ ifelse(. == 1, TRUE, FALSE)) %>%
+mutate_at(vars(matches("^LackDeferralInfo[1-4]$")), 
+            ~ replace_na(., FALSE))
+
+#ConsequenceFer
+data <- data %>% mutate_at(vars(matches("^ConsequenceFer[1-9]$")), ~ ifelse(. == 1, TRUE, FALSE)) %>%
+mutate_at(vars(matches("^ConsequenceFer[1-9]$")), 
+            ~ replace_na(., FALSE))
 
 ```
 
@@ -667,7 +677,7 @@ tmp <- tmp %>%
 ```{r}
 #Export summary count data
 DataExport <- apply(tmp,MARGIN = 2,FUN = table)
-saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - NL.RDS")
+saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/individual/1. iDPS - Summary data - NL.RDS")
 
 ```
 

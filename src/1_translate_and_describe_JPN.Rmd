@@ -1018,7 +1018,7 @@ tmp <- tmp %>%
 ```{r}
 #Export summary count data
 DataExport <- apply(tmp,MARGIN = 2,FUN = table)
-saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/1. iDPS - Summary data - JPN.RDS")
+saveRDS(DataExport,file="L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/individual/1. iDPS - Summary data - JPN.RDS")
 
 ```
 
