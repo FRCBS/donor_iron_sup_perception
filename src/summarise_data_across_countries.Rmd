@@ -21,9 +21,177 @@ library(dplyr)
 
 ```
 
+```{r functions, include=FALSE}
+# Helper function to save plots
+save_plot <- function(p, filename, width, height) {
+  ggsave(filename, plot = p, width = width, height = height)
+}
+
+plot_type_1 <- function(qdata=qdata, country_colors, folder_name, VariableName, figwidth=10, figheight=3, free_y=T) {
+
+ p <- ggplot(qdata) + 
+  geom_col(aes(x = answer, y = Percentage, fill = Country)) +  # Reverse x and y to correct orientation
+  coord_flip()  # Flip the axes to maintain the correct orientation
+if(free_y){
+  p <- p + facet_wrap(~ Country, scales = "free_y", strip.position = "top", nrow = 1)
+} else {
+  p <- p + facet_wrap(~ Country, strip.position = "top", nrow = 1)
+}
+p <- p + 
+  xlab("Percentage") +
+  ylab(" ") +
+  ggtitle(unique(qdata$Question_Text)[1]) +
+  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 100)) +  # Note the y-axis is now continuous
+  scale_fill_manual(values = country_colors) +
+  guides(fill = FALSE) +
+  theme_bw() +
+  theme(
+    strip.text.y.left = element_text(angle = 0),
+    strip.placement = "outside",
+    strip.text = element_text(size = 12)
+  ) +
+  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
+            hjust = -0.5, size = 3) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))  # x-axis is now the discrete axis
+
+print(p)
+#   # Create plot
+#   p <- ggplot(qdata) + 
+#     geom_col(aes(x = Percentage, y = answer, fill = Country)) 
+#   if(free_y){
+#     p <- p+facet_wrap(~ Country, scales = "free_y", strip.position = "top", nrow = 1)
+#   }else{
+#     p <- p+facet_wrap(~ Country, strip.position = "top", nrow = 1)
+#   }
+#     p<- p + xlab("Percentage") +
+#     ylab(" ") +
+#     ggtitle(unique(qdata$Question_Text)[1]) +
+#     scale_x_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120)) +
+#     scale_fill_manual(values = country_colors) +
+#     guides(fill = FALSE) +
+#     theme_bw() +
+#     theme(
+#       strip.text.y.left = element_text(angle = 0),
+#       strip.placement = "outside",
+#       strip.text = element_text(size = 12)
+#     ) +
+#     geom_text(aes(x = Percentage, y = answer, label = round(Percentage, 1)), 
+#               hjust = -0.5, size = 3) +
+#     scale_y_discrete(labels = function(x) str_wrap(x, width = 10))
+#   
+#   print(p)
+# 
+   # Save plot
+   filename <- paste0(folder_name, "/", VariableName, " - by country.png")
+   save_plot(p, filename, width = figwidth, height = figheight)
+}
 
 
-```{r, echo=F}
+plot_type_2 <- function(qdata=qdata, country_colors=country_colors, folder_name=FolderName, VariableName, figwidth=9, figheight=7) {
+
+  # Create plot
+  p <- ggplot(qdata) +
+    geom_bar(aes(x = Statement, y = Percentage, fill = Country), position = 'dodge', stat = "identity") +
+    ylab("Percentage") +
+    xlab(" ") +
+    ggtitle(str_wrap(paste0(unique(qdata$Q)[1], "?"), width = 75)) +
+    scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 101), position = "left") +
+    scale_fill_manual(values = country_colors) +
+    theme_bw() +
+    theme(
+      strip.text.y.left = element_text(angle = 0),
+      strip.placement = "outside"
+    ) +
+    geom_text(aes(x = Statement, y = Percentage, label = round(Percentage, 1), group = Country), 
+              vjust = -0.5, size = 3, 
+              position = position_dodge(width = 0.9)) +
+    scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+  
+  print(p)
+
+  # Save plot
+  filename <- paste0(folder_name, "/", VariableName," - by country.png")
+  save_plot(p, filename, width = figwidth, height = figheight)
+}
+
+plot_type_3 <- function(qdata=qdata, country_colors=country_colors, folder_name=FolderName, VariableName, free_x=T, figwidth=9, figheight=7) {
+  #this function is for plots with the percentage on the x axis and the categories on the x axis, faceted by country and statement
+  p <- ggplot(qdata) + 
+    geom_col(aes(x = answer, y = Percentage, fill = Country)) 
+  if(free_x){
+    p <- p+    facet_grid(Statement ~ Country, 
+               labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
+               switch = "y",
+               scales = "free_x") 
+  }else{
+        p <- p+    facet_grid(Statement ~ Country, 
+               labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
+               switch = "y") 
+  }
+
+    p <- p + ylab("Percentage") +
+    xlab(" ") +
+    ggtitle(unique(qdata$Q)[1]) +
+    scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") +
+    scale_fill_manual(values = country_colors) +
+    guides(fill = FALSE) +
+    theme_bw() +
+    theme(
+      strip.text.y.left = element_text(angle = 0),
+      strip.placement = "outside"
+    ) +
+    geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
+              vjust = -0.5, size = 3) +
+    scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+  
+  print(p)
+  
+  # Save plot
+  filename <- paste0(folder_name, "/", VariableName, " - by country.png")
+  save_plot(p, filename, width = figwidth, height = figheight)
+}
+
+plot_type_4 <- function(qdata=qdata, country_colors=country_colors, folder_name=FolderName, VariableName, free_y=T,figwidth=9, figheight=7){
+  
+  p <- ggplot(qdata) + 
+  geom_col(aes(x = Percentage, y = answer, fill = Country))   # Swap x and y
+  if(free_y){
+    p<- p+ facet_grid(Statement ~ Country, 
+             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
+             switch = "y",
+             scales="free_y") 
+    } else {
+          p<- p+ facet_grid(Statement ~ Country, 
+             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
+             switch = "y") 
+    }# Keeps facet labels on the left
+  p <- p + xlab("Percentage") +  # Now label x-axis as "Percentage"
+  ylab(" ") +  # Y-axis for "answer"
+  ggtitle(paste0(unique(qdata$Q)[1], "?")) +
+  scale_x_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 110), position = "bottom") +  # Ensure x-axis (Percentage) is at the bottom
+  scale_fill_manual(values = country_colors) +
+  guides(fill = FALSE) +
+  theme_bw() +
+  theme(
+    strip.text.y.left = element_text(angle = 0),  # Keeps facet text horizontal
+    strip.placement = "outside",  # Places facet labels outside the plot area
+    axis.text.y = element_text(hjust = 1),  # Moves y-axis (answer) labels to the right
+    axis.title.y = element_text(hjust = 1)  # Adjusts title of y-axis (answer)
+  ) +
+  geom_text(aes(x = Percentage, y = answer, label = round(Percentage, 1)), 
+            hjust = -0.5, size = 3) +  # Adjust text alignment based on new x and y
+  scale_y_discrete(labels = function(x) str_wrap(x, width = 15), position="right")  # Adjust y-axis labels (answer)
+
+print(p)
+
+  filename <- paste0(folder_name, "/", VariableName, " - by country.png")
+  save_plot(p, filename, width = figwidth, height = figheight)
+} 
+
+
+```
+
+```{r load data, echo=F}
 currentDate <- format(Sys.time(), "%Y-%m-%d")
 FolderName <- paste("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/3. Plots/", currentDate,sep="")
 dir.create(FolderName)
@@ -44,12 +212,14 @@ country_colors <- c(
   "France"      = "#0072B2", # Blue (Colorblind-friendly blue)
   "Sweden"      = "#F0E442", # Yellow (Colorblind-friendly yellow)
   "Finland"     = "#56B4E9", # Sky blue (Colorblind-friendly cyan)
-  "Japan"       = "#D55E00"  # Red (Colorblind-friendly reddish-brown)
+  "Japan"       = "#D55E00",  # Red (Colorblind-friendly reddish-brown)
+  "Germany"     = "#009E73", # Green (Colorblind-friendly green)
+  "United States" = "#CC79A7" # Purple (Colorblind-friendly purple)
 )
 
 
 #read in questions
-question_text <- read.csv("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/questions.csv")
+question_text <- read.csv("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/questions.csv") %>% select(c(Variable, Question_Text))
 
 
 ```
@@ -58,7 +228,9 @@ question_text <- read.csv("L:/DonorMedicin/FORTE/E Internation Donor Perception 
 
 ## Age
 
-```{r, echo=F}
+
+```{r, echo=F, fig.width = 10, fig.height = 3}
+
 q <- data %>% filter(grepl("^Age$", Question))
 
 #manually add row for NL for aesthetic reasons
@@ -66,6 +238,10 @@ new_row <- data.frame(Question = "Age", country = "NL", Response = "18-20",
                       Count = 0, Percentage = 0, Country = "Netherlands", stringsAsFactors = FALSE)
 
 q <- rbind(q, new_row)
+
+levels <- c("18-20", "17-20", "[18,25]", "21-30", "(25,35]", 
+                                           "31-40", "(35,45]", "41-50", "(45,55]", 
+                                           "51-60", "(55,65]", "61-70", "(65,68]", "71-80")
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
   mutate(
@@ -76,117 +252,237 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
                                           "51-60", "(55,65]", "61-70", "(65,68]", "71-80"))
   )
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = Percentage, y = answer, fill = Country)) +  # Swapped x and y
-  facet_wrap(~ Country, scales = "free_y", strip.position = "top", nrow=1) +  # Use facet_wrap and free_y
-  xlab("Percentage") +  # Label for x-axis (Percentage)
-  ylab(" ") +           # Empty y label
-  ggtitle(unique(qdata$Question_Text)[1]) +
-  scale_x_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120)) +  # Set x scale for Percentage
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0),  # Keeps facet text horizontal
-    strip.placement = "outside",                  # Places facet labels outside
-    strip.text = element_text(size = 12)          # Adjust facet label size for clarity
-  ) +
-  geom_text(aes(x = Percentage, y = answer, label = round(Percentage, 1)), 
-            hjust = -0.5, size = 3) +  # Adjust for horizontal text justification
-  scale_y_discrete(labels = function(x) str_wrap(x, width = 10))  # Set y scale with wrapped text
-
-p
-
-FileName <- paste(FolderName, "/Age - by country.png",sep="")
-ggsave(FileName, width = 10, height = 3)
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Age", folder_name = FolderName)
 ```
 
 ## Sex
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 10, fig.height = 3}
 q <- data %>% filter(grepl("^Sex$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable") %>% distinct(Country, Response, .keep_all = TRUE)  %>% distinct(Country, Response, .keep_all = TRUE)  %>%
+  mutate(
+    #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
+    #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
+    answer = factor(Response, levels = c("Prefer not to say", "Other", "Non-binary", "Male", "Female" ))
+  )%>% 
+  droplevels()
+
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Sex", folder_name = FolderName, free_y=F)
+```
+
+## Menstruation
+
+```{r, echo=F,fig.width = 10, fig.height = 5}
+q <- data %>% filter(grepl("^Menstruation$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Response = ifelse(Response == "No, other", "No, due to a different reason", as.character(Response)),
+    #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
+    #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
+    answer = factor(Response, levels = c("Yes",
+                                         "No, due to current contraception use",
+                                         "No, due to current pregnancy", 
+                                         "No, due to hysterectomy",
+                                         "No, due to menopause",
+                                         "No, due to a different reason",
+                                         "No"))
+  )%>% 
+  droplevels()
+
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Menstruation", folder_name = FolderName, free_y=F, figheight = 5)
+```
+
+## Area
+
+```{r, echo=F,fig.width = 10, fig.height = 3}
+q <- data %>% filter(grepl("^Area$", Question))
 
 
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
   mutate(
+    Response = ifelse(Response=="In a city of over 100 000 people", "In a city of over 100,000 people", as.character(Response)),
     #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
     #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
-    answer = factor(Response, levels = c("Prefer not to say", "Other", "Non-binary", "Male", "Female" ))
-  )
+    answer = Response
+  )%>% 
+  droplevels()
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = Percentage, y = answer, fill = Country)) +  # Swapped x and y
-  facet_wrap(~ Country, strip.position = "top", nrow=1) +  # Use facet_wrap and free_y
-  xlab("Percentage") +  # Label for x-axis (Percentage)
-  ylab(" ") +           # Empty y label
-  ggtitle(unique(qdata$Question_Text)[1]) +
-  scale_x_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120)) +  # Set x scale for Percentage
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0),  # Keeps facet text horizontal
-    strip.placement = "outside",                  # Places facet labels outside
-    strip.text = element_text(size = 12)          # Adjust facet label size for clarity
-  ) +
-  geom_text(aes(x = Percentage, y = answer, label = round(Percentage, 1)), 
-            hjust = -0.5, size = 3) +  # Adjust for horizontal text justification
-  scale_y_discrete(labels = function(x) str_wrap(x, width = 10))  # Set y scale with wrapped text
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Area", folder_name = FolderName, free_y=F)
+```
 
-p
+## Education
 
-FileName <- paste(FolderName, "/Sex - by country.png",sep="")
-ggsave(FileName, width = 10, height = 3)
+```{r, echo=F,fig.width = 10, fig.height = 5}
+q <- data %>% filter(grepl("^Education$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Response = ifelse(Response == "Applied Sciences", "Applied sciences", as.character(Response)),
+    Response = ifelse(Response == "High School", "High school", as.character(Response)),
+    #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
+    #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
+    answer = factor(Response, levels = c("None", "Other","Primary school", "High school", "College", "Applied sciences", "University"))
+  )%>% 
+  droplevels()
+
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Education", folder_name = FolderName, free_y=F, figheight = 5)
+```
+
+## Health
+
+```{r, echo=F,fig.width = 10, fig.height = 5}
+q <- data %>% filter(grepl("^Health$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
+    #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
+    answer = factor(Response, levels = c("Poor", "Fair", "Good", "Very good", "Excellent"))
+  )%>% 
+  droplevels()
+
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "HealthStatus", folder_name = FolderName, free_y=F, figheight = 5)
+```
+
+## Diet
+```{r, echo=F,fig.width = 10, fig.height = 5}
+q <- data %>% filter(grepl("^Diet$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
+    #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
+    answer = factor(Response, levels = c(
+      "No",                                                          
+"Yes, flexitarian (at least three days without meat)",        
+"Yes, lakto-ovovegan (no meat and no fish, but milk and eggs)",
+"Yes, pescatarian (no meat)",                                  
+"Yes, vegan (no animal products)",                             
+"Yes, vegetarian (no meat and no fish)"
+    ))
+  )%>% 
+  droplevels()
+
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Diet", folder_name = FolderName, free_y=F, figheight = 5)
+```
+
+# Donation behavior
+
+## Number of donations
+
+```{r, echo=F,fig.width = 10, fig.height = 5}
+q <- data %>% filter(grepl("^Number_donation$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
+    #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
+    answer = factor(Response, levels = c(
+"None",
+"1 - 3 times",        
+"4 - 10 times",       
+"More than 10 times", 
+"More than 30 times",
+"I don't know"
+    ))
+  )%>% 
+  droplevels()
+
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Number_donation", folder_name = FolderName, free_y=F, figheight = 5)
+```
+
+## Last donation
+
+```{r, echo=F,fig.width = 10, fig.height = 5}
+q <- data %>% filter(grepl("^Last_donation$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Response = ifelse(Response == "More than 2 years ago", "Longer than 2 years ago", as.character(Response)),
+    #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
+    #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
+    answer = factor(Response, levels = c(
+"I cannot remember",        
+"Longer than 2 years ago",  
+"1-2 years ago",
+"6 months to a year ago",
+"Within the last 6 months"
+    ))
+  )%>% 
+  droplevels()
+
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Last_donation", folder_name = FolderName, free_y=F, figheight = 5)
+```
+
+# Blood service
+
+## Opinion
+
+```{r, echo=F,fig.width = 9, fig.height = 10}
+q <- data %>% filter(grepl("^OpinionBloodService([1-9])$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    
+    Q = "To what extent do you agree or disagree with the following statements?",
+    answer = ordered(Response, levels=c("Totally disagree", "Disagree", "Neutral", "Agree", "Totally agree")),
+    Statement=Question_Text
+  )%>% 
+  droplevels()
+
+
+plot_type_4(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "OpinionBloodService", free_y=F, figheight = 10)
+
 ```
 
 # Deferral
 
 ## Been deferred?
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 10, fig.height = 3}
 q <- data %>% filter(grepl("^Deferral$", Question))
-
-
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
   mutate(
     #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
     #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
     answer = factor(trimws(Response), levels = c("I don’t know", "No", "Yes, multiple times", "Yes, once"))
-  )
+  )%>% 
+  droplevels()
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = Percentage, y = answer, fill = Country)) +  # Swapped x and y
-  facet_wrap(~ Country, strip.position = "top", nrow=1) +  # Use facet_wrap and free_y
-  xlab("Percentage") +  # Label for x-axis (Percentage)
-  ylab(" ") +           # Empty y label
-  ggtitle(str_wrap(unique(qdata$Question_Text)[1], width = 75)) +
-  scale_x_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120)) +  # Set x scale for Percentage
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0),  # Keeps facet text horizontal
-    strip.placement = "outside",                  # Places facet labels outside
-    strip.text = element_text(size = 12)          # Adjust facet label size for clarity
-  ) +
-  geom_text(aes(x = Percentage, y = answer, label = round(Percentage, 1)), 
-            hjust = -0.5, size = 3) +  # Adjust for horizontal text justification
-  scale_y_discrete(labels = function(x) str_wrap(x, width = 10))  # Set y scale with wrapped text
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Deferral", folder_name = FolderName, free_y=F)
+```
 
-p
+## Last deferral
 
-FileName <- paste(FolderName, "/Deferral - by country.png",sep="")
-ggsave(FileName, width = 10, height = 3)
+```{r, echo=F,fig.width = 10, fig.height = 5}
+q <- data %>% filter(grepl("^Last_Deferral$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
+    #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
+    answer = factor(Response, levels = c(
+"I cannot remember",
+"More than 2 years ago", 
+"1-2 years ago",            
+"6 months to a year ago",   
+"Within the last 6 months",
+"Currently"       
+
+    ))
+  )%>% 
+  droplevels()
+
+plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Last_deferral", folder_name = FolderName, free_y=F, figheight = 5)
 ```
 
 ## Deferral source
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("DeferralSource([1-7]|6A|2.NL)$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -194,43 +490,34 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("TRUE", "FALSE", "Yes", "No"))
-  ) %>% filter(Response == "Yes" | Response == "TRUE") %>% mutate(Statement = ordered(Statement, levels = c(" Blood service staff", " Blood service website and/or brochure", " Donor physician"," Health care practitioner", " Search information on the internet", " Other, namely", " None")))
+  ) %>% filter(Response == "Yes" | Response == "TRUE") %>% mutate(Statement = ordered(Statement, levels = c(" Blood service staff", " Blood service website and/or brochure", " Donor physician"," Health care practitioner", " Search information on the internet", " Other, namely", " None")))%>% 
+  droplevels()
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_bar(aes(x = Statement, y = Percentage, fill = Country), 
-           position = 'dodge', stat = "identity") + 
-  # facet_grid(Statement ~ ., 
-  #            labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-  #            switch = "y",
-  #            scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1],"?"), width=75)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "left") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  #guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = Statement, y = Percentage, label = round(Percentage, 1), group = Country), 
-            vjust = -0.5, size = 3, 
-            position = position_dodge(width = 0.9)) + # Use dodge to align text with bars
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "DeferralSource")
+```
 
+## Deferral source confidence
 
-p
+```{r, echo=F,fig.width = 9, fig.height = 7}
+q <- data %>% filter(grepl("^DeferralSource[1-9]_Confidence.FI$", Question))
 
-FileName <- paste(FolderName, "/DeferralSource - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Response = trimws(as.character(Response)),
+    Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
+    Statement = sapply(Statement, function(x) str_remove(x, "confidence ")),
+    Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
+    answer = ordered(Response, levels=c(1,2,3,4,5)) 
+  )%>% mutate(Statement = ordered(Statement, levels = c(" Blood service staff", " Blood service website and/or brochure", " Donor physician"," Health care practitioner", " Search information on the internet", " Other, namely"))) %>%
+  droplevels()
+
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="DeferralSource_Confidence", free_x=T)
 ```
 
 
 ## Deferral Info
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^DeferralInfo[1-9]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -238,40 +525,18 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c(1,2,3,4,5))
-  )
+  )%>% 
+  droplevels()
 
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = answer, y = Percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(unique(qdata$Q)[1])+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
-            vjust = -0.5, size = 3) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="DeferralInfo", free_x=F)
 
-p
-
-FileName <- paste(FolderName, "/DeferralInfo - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
 
 ```
 
-## Deferral source
+## Missing info about deferral
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^LackDeferralInfo([1-5])$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -279,88 +544,110 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("TRUE", "FALSE", "Yes", "No"))
-  ) %>% filter(Response == "Yes" | Response == "TRUE") 
+  ) %>% filter(Response == "Yes" | Response == "TRUE") %>% 
+  droplevels()
 
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_bar(aes(x = Statement, y = Percentage, fill = Country), 
-           position = 'dodge', stat = "identity") + 
-  # facet_grid(Statement ~ ., 
-  #            labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-  #            switch = "y",
-  #            scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1],"?"), width=75)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "left") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  #guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = Statement, y = Percentage, label = round(Percentage, 1), group = Country), 
-            vjust = -0.5, size = 3, 
-            position = position_dodge(width = 0.9)) + # Use dodge to align text with bars
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-
-p
-
-FileName <- paste(FolderName, "/LackDeferralInfo - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "LackDeferralInfo")
 ```
-# Iron Loss
 
-## Account for Iron Loss
+# Supplements
 
-```{r, echo=F}
-q <- data %>% filter(grepl("^AccForIronLoss$", Question))
+## General supplements
+
+
+```{r, echo=F,fig.width = 9, fig.height = 7}
+q <- data %>% filter(grepl("^Supplements[1-9]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
   mutate(
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
+    answer = ordered(Response, levels=c(1,2,3,4,5))
+  )%>% 
+  droplevels()
+
+
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="Supplements", free_x=F)
+
+
+```
+
+## General use
+
+```{r, echo=F,fig.width = 9, fig.height = 7}
+q <- data %>% filter(grepl("^SupplementsUse.NL$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Statement = Response,
+    Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
+    answer = ordered(Response, levels=c("Yes", "No", "Never", "Not anymore", "Sometimes", "Every day"))
+  ) %>% 
+  droplevels()
+
+
+plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "SupplementsUse_general")
+```
+
+## Reason supplement use
+
+```{r, echo=F,fig.width = 9, fig.height = 7} 
+# have to look at data structure again, something is not right at least in NL
+
+# q <- data %>% filter(grepl("^SupplementsReason([0-9]|6A)$", Question))
+# 
+# qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+#   mutate(
+#     Statement = Response,
+#     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
+#     answer = ordered(Response, levels=c("TRUE", "FALSE", "Yes", "No"))
+#   ) %>% filter(Response == "Yes" | Response == "TRUE") %>% 
+#   droplevels()
+# 
+# 
+# plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "SupplementsReason")
+```
+
+## Supplements Open
+
+```{r, echo=F,fig.width = 9, fig.height = 7}
+q <- data %>% filter(grepl("^SupplementsOpen$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Statement = Response,
+    Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
+    answer = ordered(Response, levels=c("Yes", "No"))
+  ) %>% 
+  droplevels()
+
+
+plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "SupplementsOpen")
+```
+
+# Iron Loss
+
+## Account for Iron Loss
+
+```{r, echo=F,fig.width = 9, fig.height = 7}
+q <- data %>% filter(grepl("^AccForIronLoss$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Statement = Response,
+    Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("TRUE", "FALSE", "Yes", "No"))
-  ) 
+  ) %>% 
+  droplevels()
 
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_bar(aes(x = answer, y = Percentage, fill = Country), 
-           position = 'dodge', stat = "identity") + 
-  # facet_grid(Statement ~ ., 
-  #            labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-  #            switch = "y",
-  #            scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1],"?"), width=75)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "left") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  #guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1), group = Country), 
-            vjust = -0.5, size = 3, 
-            position = position_dodge(width = 0.9)) + # Use dodge to align text with bars
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-
-p
-
-FileName <- paste(FolderName, "/AccForIronLoss - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "AccForIronLoss")
 ```
 
 ## Account for iron loss: How?
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^AccForIronLoss([1-5]|4A)$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -368,43 +655,34 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("TRUE", "FALSE", "Yes", "No"))
-  ) %>% filter(Response == "Yes" | Response == "TRUE") 
+  ) %>% filter(Response == "Yes" | Response == "TRUE") %>% 
+  droplevels()
 
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_bar(aes(x = Statement, y = Percentage, fill = Country), 
-           position = 'dodge', stat = "identity") + 
-  # facet_grid(Statement ~ ., 
-  #            labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-  #            switch = "y",
-  #            scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1],"?"), width=75)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "left") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  #guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = Statement, y = Percentage, label = round(Percentage, 1), group = Country), 
-            vjust = -0.5, size = 3, 
-            position = position_dodge(width = 0.9)) + # Use dodge to align text with bars
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "AccForIronLossHow")
+```
 
+## Iron supplement use
 
-p
+```{r, echo=F,fig.width = 9, fig.height = 7} 
 
-FileName <- paste(FolderName, "/AccForIronLossHow - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+q <- data %>% filter(grepl("^IronSuppUse$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+   mutate(
+     Response = trimws(Response),
+     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1])#,
+     #answer = ordered(Response, levels=c("TRUE", "FALSE", "Yes", "No"))
+   ) %>% 
+   droplevels()
+ 
+ 
+plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "IronSuppUse")
 ```
 
 ## Concerns Iron Supplements
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^ConcernIronSupp([1-9]|5A)$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -412,39 +690,14 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("TRUE", "FALSE", "Yes", "No"))
-  ) %>% filter(Response == "TRUE" | Response == "Yes") 
+  ) %>% filter(Response == "TRUE" | Response == "Yes") %>% 
+  droplevels()
 
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_bar(aes(x = Statement, y = Percentage, fill = Country), 
-           position = 'dodge', stat = "identity") + 
-  # facet_grid(Statement ~ ., 
-  #            labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-  #            switch = "y",
-  #            scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1],"?"), width=75)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "left") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  #guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = Statement, y = Percentage, label = round(Percentage, 1), group = Country), 
-            vjust = -0.5, size = 3, 
-            position = position_dodge(width = 0.9)) + # Use dodge to align text with bars
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-
-p
-
-FileName <- paste(FolderName, "/Concerns Iron Supplements - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "ConcernsIronSupplements")
 ```
+
+
 ## Reason Supplements
 
 ```{r, echo=F}
@@ -457,7 +710,8 @@ ggsave(FileName, width = 9, height = 7)
 #     #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
 #     #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
 #     answer = factor(Response, levels = c("Prefer not to say", "Other", "Non-binary", "Male", "Female" ))
-#   )
+#   )%>% 
+#  droplevels()
 # 
 # #Faceted by country
 # p <- ggplot(qdata) + 
@@ -487,7 +741,7 @@ ggsave(FileName, width = 9, height = 7)
 
 ## Iron Def Pref
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^IronDefPref[1-9]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -496,35 +750,11 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c(1,2,3,4,5))
-  )
+  )%>% 
+  droplevels()
 
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = answer, y = Percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y",
-             scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1],"?"),width=75))+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
-            vjust = -0.5, size = 3) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-p
-
-FileName <- paste(FolderName, "/Iron Def Pref - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="IronDefPref", free_x=T)
 
 ```
 
@@ -532,7 +762,7 @@ ggsave(FileName, width = 9, height = 7)
 
 ## Occurrence
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^Symptoms([1-9]|10)$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -540,42 +770,17 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("Never", "Sometimes", "Often", "Always" ))
-  )
+  )%>% 
+  droplevels()
 
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = Percentage, y = answer, fill = Country)) +  # Swap x and y
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y") +  # Keeps facet labels on the left
-  xlab("Percentage") +  # Now label x-axis as "Percentage"
-  ylab(" ") +  # Y-axis for "answer"
-  ggtitle(paste0(unique(qdata$Q)[1], "?")) +
-  scale_x_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "bottom") +  # Ensure x-axis (Percentage) is at the bottom
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0),  # Keeps facet text horizontal
-    strip.placement = "outside",  # Places facet labels outside the plot area
-    axis.text.y = element_text(hjust = 1),  # Moves y-axis (answer) labels to the right
-    axis.title.y = element_text(hjust = 1)  # Adjusts title of y-axis (answer)
-  ) +
-  geom_text(aes(x = Percentage, y = answer, label = round(Percentage, 1)), 
-            hjust = -0.5, size = 3) +  # Adjust text alignment based on new x and y
-  scale_y_discrete(labels = function(x) str_wrap(x, width = 10), position="right")  # Adjust y-axis labels (answer)
-
-p
-
-FileName <- paste(FolderName, "/Symptoms - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_4(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "SymptomsOccurrence", free_y=F)
 
 ```
 
 ## Severity
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^Symptoms([1-9]|[1-9][0-9])_Severity$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -583,34 +788,10 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c(1,2,3,4,5))
-  )
+  )%>% 
+  droplevels()
 
-
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = answer, y = Percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(unique(qdata$Q)[1])+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
-            vjust = -0.5, size = 3) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-p
-
-FileName <- paste(FolderName, "/Symptoms severity - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="SymptomsSeverity", free_x=F)
 
 ```
 
@@ -619,7 +800,7 @@ ggsave(FileName, width = 9, height = 7)
 
 ## Blood service
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^Knowledge[1-9]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -627,39 +808,15 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sub(".*?, then (.*)", "\\1", Question_Text),
     Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
     answer = ordered(Response, levels=c("TRUE", "FALSE", "I don't know"))
-  )
+  )%>% 
+  droplevels()
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = answer, y = Percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y",
-             scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(unique(qdata$Q)[1])+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
-            vjust = -0.5, size = 3) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-p
-
-FileName <- paste(FolderName, "/Knowledge - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="Knowledge", free_x=T)
 ```
 
 ## Measurement
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^Measurement[1-9]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -667,40 +824,16 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("Yes", "No", "I don't know"))
-  )
+  )%>% 
+  droplevels()
 
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = answer, y = Percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y",
-             scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1], "?"),width=75)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
-            vjust = -0.5, size = 3) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-p
-
-FileName <- paste(FolderName, "/Measurement - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="Measurement", free_x=T)
 ```
 
 ## Knowledge Hb
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("KnowledgeHb[1-9]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -708,39 +841,15 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sub(".*?, then (.*)", "\\1", Question_Text),
     Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
     answer = ordered(Response, levels=c("TRUE", "FALSE", "I don't know"))
-  )
+  )%>% 
+  droplevels()
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = answer, y = Percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y",
-             scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(unique(qdata$Q)[1])+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
-            vjust = -0.5, size = 3) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-p
-
-FileName <- paste(FolderName, "/Knowledge Hb - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="KnowledgeHb", free_x=T)
 ```
 
 ## Knowledge Ferritin
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("KnowledgeFer[1-9]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -748,40 +857,16 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sub(".*?, then (.*)", "\\1", Question_Text),
     Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
     answer = ordered(Response, levels=c("TRUE", "FALSE", "I don't know"))
-  )
+  )%>% 
+  droplevels()
 
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = answer, y = Percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y",
-             scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(unique(qdata$Q)[1])+
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
-            vjust = -0.5, size = 3) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-p
-
-FileName <- paste(FolderName, "/Knowledge Fer - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="KnowledgeFer", free_x=T)
 ```
 
 ## Consequence Hb
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^ConsequenceHb[1-9]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -789,39 +874,15 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("TRUE", "FALSE"))
-  )
+  )%>% 
+  droplevels()
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = answer, y = Percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y",
-             scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1], "?"),width=75)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
-            vjust = -0.5, size = 3) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-p
-
-FileName <- paste(FolderName, "/Consequence Hb - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="ConsequenceHb", free_x=T)
 ```
 
 ## Consequence Fer
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^ConsequenceFer[1-9]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -831,39 +892,15 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("TRUE", "FALSE")) 
   )%>% 
-  filter(as.character(Response) == "TRUE" | as.character(answer) == "FALSE")
+  filter(as.character(Response) == "TRUE" | as.character(answer) == "FALSE")%>% 
+  droplevels()
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = answer, y = Percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y",
-             scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1], "?"),width=75)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
-            vjust = -0.5, size = 3) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-p
-
-FileName <- paste(FolderName, "/Consequence Fer - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="ConsequenceFer", free_x=T)
 ```
 
 ## Iron supplements
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^IronSuppKnowledge[1-9]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -873,39 +910,15 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("TRUE", "FALSE")) 
   )%>% 
-  filter(as.character(Response) == "TRUE" | as.character(answer) == "FALSE")
+  filter(as.character(Response) == "TRUE" | as.character(answer) == "FALSE")%>% 
+  droplevels()
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_col(aes(x = answer, y = Percentage, fill = Country)) + 
-  facet_grid(Statement ~ Country, 
-             labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-             switch = "y",
-             scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1], "?"),width=75)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = answer, y = Percentage, label = round(Percentage, 1)), 
-            vjust = -0.5, size = 3) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-p
-
-FileName <- paste(FolderName, "/Knowledge Iron Supplements - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="Knowledge Iron Supplements", free_x=T)
 ```
 
 ## Iron Supplement Side Effects
 
-```{r, echo=F}
+```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^IronSuppSE([1-9])$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
@@ -922,36 +935,9 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
                                               " I don't know" )),
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c("TRUE", "FALSE"))
-  ) %>% filter(Response == "TRUE") 
+  ) %>% filter(Response == "TRUE") %>% 
+  droplevels()
 
 
-#Faceted by country
-p <- ggplot(qdata) + 
-  geom_bar(aes(x = Statement, y = Percentage, fill = Country), 
-           position = 'dodge', stat = "identity") + 
-  # facet_grid(Statement ~ ., 
-  #            labeller = labeller(Statement = label_wrap_gen(width = 25, multi_line = TRUE)),
-  #            switch = "y",
-  #            scales= "free_x") + # Moves facet labels to the left
-  ylab("Percentage") +
-  xlab(" ") +
-  ggtitle(str_wrap(paste0(unique(qdata$Q)[1],"?"), width=75)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "left") + # Moves y-axis to the right
-  scale_fill_manual(values = country_colors) +
-  #guides(fill = FALSE) +
-  theme_bw() +
-  theme(
-    strip.text.y.left = element_text(angle = 0), # Keeps facet text horizontal
-    strip.placement = "outside"                  # Places labels outside the plot area
-  ) +
-  geom_text(aes(x = Statement, y = Percentage, label = round(Percentage, 1), group = Country), 
-            vjust = -0.5, size = 3, 
-            position = position_dodge(width = 0.9)) + # Use dodge to align text with bars
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
-
-
-p
-
-FileName <- paste(FolderName, "/Knowledge Iron Supp Side effects - by country.png",sep="")
-ggsave(FileName, width = 9, height = 7)
+plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "Knowledge Iron Supplement Side Effects")
 ```
