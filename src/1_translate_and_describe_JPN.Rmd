@@ -639,7 +639,6 @@ f1 <- function (x){
                   "Neutral"="3",
                   "Agree"="4",
                   "Totally disagree" =  "1",
-                  "Totally disagree" =  "1",
                   "Totally agree" = "5"
   )
   x <- factor(
@@ -875,7 +874,7 @@ FTcols <- data %>%
 # #49 has scale from 1-6. But if there are no 6s then it is detected here and ruins things later
 # 
 
-cols12345 <- c( "Deferral_Motivation1", "Deferral_Motivation2", "DeferralSource1_Confidence.FI", "DeferralSource3_Confidence.FI", "DeferralSource4_Confidence.FI", "DeferralSource5_Confidence.FI", "DeferralSource6_Confidence.FI", "Supplements1", "Supplements2", "Supplements3", "Supplements4", "IronSuppSanq1", "IronSuppSanq2", "IronSuppSanq3", "IronSuppSanq4", "IronSuppSanq5", "IronSuppSanq6", "IronSuppSanq7", "IronSuppSanq8", "IronSuppSanq9", "IronDefPref1",  "IronDefPref2", "IronDefPref3", "IronDefPref4", "IronDefPref5")
+cols12345 <- c( "Deferral_Motivation1", "Deferral_Motivation2", "DeferralSource1_Confidence.FI", "DeferralSource3_Confidence.FI", "DeferralSource4_Confidence.FI", "DeferralSource5_Confidence.FI", "DeferralSource6_Confidence.FI", "Supplements1", "Supplements2", "Supplements3", "Supplements4", "IronDefPref1",  "IronDefPref2", "IronDefPref3", "IronDefPref4", "IronDefPref5") #"IronSuppSanq1", "IronSuppSanq2", "IronSuppSanq3", "IronSuppSanq4", "IronSuppSanq5", "IronSuppSanq6", "IronSuppSanq7", "IronSuppSanq8", "IronSuppSanq9"
 
 cols16 <- c(
   "IronSuppSanqReason1", "IronSuppSanqReason2",  "IronSuppSanqReason3", "IronSuppSanqReason5",  "IronSuppSanqReason4.FI",  "IronSuppSanqReason6.FI" )
@@ -883,7 +882,7 @@ cols16 <- c(
 tmp <- data %>% 
   #here a set of questions is detected with some regular expression and then one of the
   #processing functions above is applied to process those questions
-  mutate_at(vars(which(str_detect(colnames(data) ,"OpinionBloodService"))), ~ f1(.) ) %>% 
+  mutate_at(vars(which(str_detect(colnames(data) ,"^OpinionBloodService[0-9]$|^IronSuppSanq[0-9]$"))), ~ f1(as.character(.)) ) %>% 
   mutate_at(vars(which(as.logical(aosncols))), ~ f2(.)) %>% #symptoms columns
   #mutate_at(vars(which(as.logical(cols16))), ~ f3(.) ) %>% #columns containing 1-6 (preferences)
   #mutate_at(vars(which(as.logical(FTcols))), ~ f4(.) ) %>% 
@@ -891,13 +890,13 @@ tmp <- data %>%
   #here instead of a regular expression, above a vector is made which tells which columns to process
   mutate_at(vars(which(as.logical(yesandnocols))), ~ f6(.) ) %>%
   mutate_at(vars(which(as.logical(zero1cols))), ~ f7(.) ) %>%
-  mutate_at(vars(which(str_detect(colnames(data), "\\bIronSuppEffect2\\b|\\bIronSuppEffect3\\b|\\bIronSuppEffect4\\b|\\bIronSuppEffect5\\b|\\bIronSuppEffect6A\\b"))), ~ f8(.))  %>%
+  mutate_at(vars(which(str_detect(colnames(data), "\\bIronSuppEffect2\\b|\\bIronSuppEffect3\\b|\\bIronSuppEffect4\\b|\\bIronSuppEffect5\\b|\\bIronSuppEffect6A\\b"))), ~ f8(.)) %>%
   mutate_at(vars(which(str_detect(colnames(data) ,"IronSuppSanqCondition"))), ~ f9(.) ) %>%
   mutate_at(vars(which(as.logical(cols16))), ~ f10(.) ) %>%
   mutate_at(vars(match(cols12345, colnames(data))), ~ f11(.)) %>%
   mutate_at(vars(which(str_detect(colnames(data) ,"Severity"))), ~ f12(.) ) %>%
-  mutate_at(vars(which(str_detect(colnames(data), "\\bDeferralInfo1\\b|\\bDeferralInfo2\\b|\\bDeferralInfo3\\b|\\bDeferralInfo4\\b|\\bDeferralInfo5\\b"))), ~ f13(.))  %>%
-  mutate_at(vars(which(str_detect(colnames(data), "\\bDeferral_Motivation1\\b|\\bDeferral_Motivation2\\b|"))), ~ f14(.))  %>%
+  mutate_at(vars(which(str_detect(colnames(data), "\\bDeferralInfo1\\b|\\bDeferralInfo2\\b|\\bDeferralInfo3\\b|\\bDeferralInfo4\\b|\\bDeferralInfo5\\b"))), ~ f13(.))%>%
+  mutate_at(vars(which(str_detect(colnames(data), "^Deferral_Motivation[0-9]$"))), ~ f14(as.character(.)))  %>%
   mutate_at(vars(which(str_detect(colnames(data) ,"Confidence"))), ~ f15(.) ) %>%
   
   mutate(

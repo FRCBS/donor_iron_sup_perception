@@ -131,7 +131,7 @@ plot_type_3 <- function(qdata=qdata, country_colors=country_colors, folder_name=
 
     p <- p + ylab("Percentage") +
     xlab(" ") +
-    ggtitle(unique(qdata$Q)[1]) +
+    ggtitle(str_wrap(unique(qdata$Q)[1], width = 75)) +
     scale_y_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 120), position = "right") +
     scale_fill_manual(values = country_colors) +
     guides(fill = FALSE) +
@@ -151,7 +151,7 @@ plot_type_3 <- function(qdata=qdata, country_colors=country_colors, folder_name=
   save_plot(p, filename, width = figwidth, height = figheight)
 }
 
-plot_type_4 <- function(qdata=qdata, country_colors=country_colors, folder_name=FolderName, VariableName, free_y=T,figwidth=9, figheight=7){
+plot_type_4 <- function(qdata=qdata, country_colors=country_colors, folder_name=FolderName, VariableName, free_y=T,figwidth=9, figheight=7, Qtitle=T){
   
   p <- ggplot(qdata) + 
   geom_col(aes(x = Percentage, y = answer, fill = Country))   # Swap x and y
@@ -166,9 +166,14 @@ plot_type_4 <- function(qdata=qdata, country_colors=country_colors, folder_name=
              switch = "y") 
     }# Keeps facet labels on the left
   p <- p + xlab("Percentage") +  # Now label x-axis as "Percentage"
-  ylab(" ") +  # Y-axis for "answer"
-  ggtitle(paste0(unique(qdata$Q)[1], "?")) +
-  scale_x_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 110), position = "bottom") +  # Ensure x-axis (Percentage) is at the bottom
+  ylab(" ")   # Y-axis for "answer"
+  if(Qtitle){
+    p <- p+ggtitle(paste0(unique(qdata$Q)[1], "?")) 
+  }else{
+    p <- p+ggtitle(unique(qdata$Q)[1])
+  }
+    
+  p <- p + scale_x_continuous(breaks = seq(0, 100, by = 50), limits = c(0, 110), position = "bottom") +  # Ensure x-axis (Percentage) is at the bottom
   scale_fill_manual(values = country_colors) +
   guides(fill = FALSE) +
   theme_bw() +
@@ -219,7 +224,7 @@ country_colors <- c(
 
 
 #read in questions
-question_text <- read.csv("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/questions.csv") %>% select(c(Variable, Question_Text))
+question_text <- read.csv("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/A Source documents/iDPS - Variable list/questions.csv") %>% select(c(Variable, Question_Text)) %>% distinct(Variable, Question_Text, .keep_all = TRUE)
 
 
 ```
@@ -260,7 +265,7 @@ plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Age", 
 ```{r, echo=F,fig.width = 10, fig.height = 3}
 q <- data %>% filter(grepl("^Sex$", Question))
 
-qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable") %>% distinct(Country, Response, .keep_all = TRUE)  %>% distinct(Country, Response, .keep_all = TRUE)  %>%
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable") %>%  
   mutate(
     #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
     #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
@@ -670,9 +675,24 @@ q <- data %>% filter(grepl("^IronSuppUse$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
    mutate(
-     Response = trimws(Response),
-     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1])#,
-     #answer = ordered(Response, levels=c("TRUE", "FALSE", "Yes", "No"))
+     Response = trimws(tolower(Response)),
+     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
+     answer=ifelse(str_detect(Response, "multivitamin.*don't know|multivitamin.*do not know"), 
+                            "I am taking multivitamins but don't know if they contain iron",
+                     ifelse(str_detect(Response, "taken iron supplements.*but not anymore"), 
+                            "I have taken iron supplements/multivitamins before, but not anymore",
+                     ifelse(str_detect(Response, "never taken iron"), 
+                            "No, I have never taken iron (containing) supplements",
+                     ifelse(str_detect(Response, "docto"), 
+                            "Yes, I am currently taking iron supplements ordered by a doctor",
+                     ifelse(str_detect(Response, "currently taking iron supplements.*blood service"), 
+                            "Yes, I am currently taking iron supplements provided by the blood service",
+                     ifelse(str_detect(Response, "currently taking iron supplements.*drugstore"), 
+                            "Yes, I am currently taking iron supplements from a drugstore",
+                     ifelse(str_detect(Response, "multivitamins.*contain iron"), 
+                            "Yes, I take multivitamins that contain iron",
+                     Response))))))),
+     Statement=answer
    ) %>% 
    droplevels()
  
@@ -697,6 +717,25 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
 plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "ConcernsIronSupplements")
 ```
 
+## Important aspects of iron supplementation policy
+
+```{r, echo=F,fig.width = 9, fig.height = 7}
+q <- data %>% filter(grepl("^IronSuppSanqReason[1-9](\\.FI)?$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Response = trimws(Response),
+    Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
+    Statement = fct_rev(Statement),
+    Q = sapply(sapply(str_split(Question_Text, "[:?]"), function(x) x[1]), function(x) paste0(x, "?")),
+    answer = ordered(Response, levels=c(1,2,3,4,5,6))
+  )%>% 
+  droplevels()
+
+
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="ImportantAspectsIronSupp", free_x=T, )
+
+```
 
 ## Reason Supplements
 
@@ -739,7 +778,64 @@ plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName
 # ggsave(FileName, width = 10, height = 3)
 ```
 
-## Iron Def Pref
+## Iron supplement effects
+
+```{r, echo=F,fig.width = 9, fig.height = 7}
+q <- data %>% filter(grepl("^IronSuppEffect([1-9]|6A)$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Response = trimws(Response),
+    Response = ifelse(Response == "Increases", "Increased", as.character(Response)),
+    Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
+    Statement = ordered(Statement, levels = c(" Physical fitness"," Fatigue"," Dizziness"," Headaches"," Gastrointestinal problems", " Other, namely")),
+    Q = "In your experience taking iron supplements, have noticed any effects in relation to the listed conditions?",#sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
+    answer = ordered(Response, levels=c("Increased", "No effect","Decreased", "Don't know"))
+  )%>% 
+  droplevels()
+
+
+plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName="IronSuppEffect", free_x=T)
+
+```
+
+## Perception iron supplements as a policy
+
+```{r, echo=F,fig.width = 9, fig.height = 10}
+q <- data %>% filter(grepl("^IronSuppSanq([1-9])$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Response = trimws(Response),
+    Statement = sapply(sapply(str_split(Question_Text, "[,:?]"), function(x) x[2]), function(x) str_remove(x, "then ")),
+    Q = sapply(sapply(str_split(Question_Text, "[,:?]"), function(x) x[1]), function(x) paste0(x, " then...")),
+    answer = ordered(Response, levels=c("Totally disagree", "Disagree", "Neutral", "Agree", "Totally agree"))
+  )%>% 
+  droplevels()
+
+
+plot_type_4(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "PerceptionIronSuppPolicy", free_y=F, figheight = 10, Qtitle=F)
+
+```
+
+## Iron supplement conditions
+
+```{r, echo=F,fig.width = 9, fig.height = 7}
+q <- data %>% filter(grepl("^IronSuppSanqCondition[0-9]$", Question))
+
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+  mutate(
+    Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
+    Q = "If the blood service would provide iron supplements to you, in what situation would you be willing to use them",#sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
+    answer = ordered(Response, levels=c("Agree", "Disagree"))
+  ) %>% filter(answer == "Agree")%>%
+  droplevels()
+
+
+plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName, VariableName = "IronSupplementConditions")
+```
+
+## Ferritin deferral preferences
 
 ```{r, echo=F,fig.width = 9, fig.height = 7}
 q <- data %>% filter(grepl("^IronDefPref[1-9]$", Question))
