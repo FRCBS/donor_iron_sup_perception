@@ -244,17 +244,14 @@ new_row <- data.frame(Question = "Age", country = "NL", Response = "18-20",
 
 q <- rbind(q, new_row)
 
-levels <- c("18-20", "17-20", "[18,25]", "21-30", "(25,35]", 
-                                           "31-40", "(35,45]", "41-50", "(45,55]", 
-                                           "51-60", "(55,65]", "61-70", "(65,68]", "71-80")
 
-qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
+qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%  filter(Response %in% c("18-20", "17-20", "21-30", "31-40", "41-50","51-60", "61-70", "71-80")) %>%
   mutate(
     #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
     #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
-    answer = factor(Response, levels = c("18-20", "17-20", "[18,25]", "21-30", "(25,35]", 
-                                          "31-40", "(35,45]", "41-50", "(45,55]", 
-                                          "51-60", "(55,65]", "61-70", "(65,68]", "71-80"))
+    answer = factor(Response, levels = c("18-20", "17-20", "21-30", 
+                                          "31-40", "41-50", 
+                                          "51-60", "61-70", "71-80"))
   )
 
 plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Age", folder_name = FolderName)
@@ -467,17 +464,23 @@ plot_type_1(qdata=qdata, country_colors = country_colors, VariableName = "Deferr
 q <- data %>% filter(grepl("^Last_Deferral$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
-  mutate(
+   mutate(Response = case_when(
+    Response %in% c("<6 months", "Within the last 6 months", "Currently") ~ "<6 months",
+    Response %in% c("6-12 months", "6 months to a year ago") ~ "6-12 months",
+    Response %in% c("12-24 months", "1-2 years ago") ~ "12-24 months",
+    Response %in% c(">24 months", "More than 2 years ago") ~ ">24 months",
+    Response == "I cannot remember" ~ "I don't know",
+    Response == "I don't know" ~ "I don't know",
+    TRUE ~ "Other"
+  ))%>% mutate(
     #Statement = sub(".*?, then (.*)", "\\1", Question_Text),
     #Q = "Are the following statements True or False?", #sub("(.*), then.*", "\\1", Question_Text),
     answer = factor(Response, levels = c(
-"I cannot remember",
-"More than 2 years ago", 
-"1-2 years ago",            
-"6 months to a year ago",   
-"Within the last 6 months",
-"Currently"       
-
+"I don't know",
+">24 months", 
+"12-24 months",            
+"6-12 months",   
+"<6 months"
     ))
   )%>% 
   droplevels()
@@ -511,7 +514,7 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
     Response = trimws(as.character(Response)),
     Statement = sapply(str_split(Question_Text, "[:?]"), function(x) x[2]),
     Statement = sapply(Statement, function(x) str_remove(x, "confidence ")),
-    Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
+    Q = "To what extent do you trust this source of information? (1 = very little, 5 = very much)", #sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
     answer = ordered(Response, levels=c(1,2,3,4,5)) 
   )%>% mutate(Statement = ordered(Statement, levels = c(" Blood service staff", " Blood service website and/or brochure", " Donor physician"," Health care practitioner", " Search information on the internet", " Other, namely"))) %>%
   droplevels()
@@ -542,7 +545,7 @@ plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName
 ## Missing info about deferral
 
 ```{r, echo=F,fig.width = 9, fig.height = 7}
-q <- data %>% filter(grepl("^LackDeferralInfo([1-5])$", Question))
+q <- data %>% filter(grepl("^LackDeferralInfo[1-5]$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
   mutate(
@@ -581,7 +584,7 @@ plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName
 ## General use
 
 ```{r, echo=F,fig.width = 9, fig.height = 7}
-q <- data %>% filter(grepl("^SupplementsUse.NL$", Question))
+q <- data %>% filter(grepl("^(SupplementsUse.NL|SupplementsUse_Other.FI)$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
   mutate(
@@ -596,6 +599,8 @@ plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName
 ```
 
 ## Reason supplement use
+
+Plot not available yet due to data processing issues.
 
 ```{r, echo=F,fig.width = 9, fig.height = 7} 
 # have to look at data structure again, something is not right at least in NL
@@ -653,7 +658,7 @@ plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName
 ## Account for iron loss: How?
 
 ```{r, echo=F,fig.width = 9, fig.height = 7}
-q <- data %>% filter(grepl("^AccForIronLoss([1-5]|4A)$", Question))
+q <- data %>% filter(grepl("^AccForIronLoss([1-5]|4A)(\\.FI)?$", Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
   mutate(
@@ -703,7 +708,7 @@ plot_type_2(qdata=qdata, country_colors = country_colors, folder_name=FolderName
 ## Concerns Iron Supplements
 
 ```{r, echo=F,fig.width = 9, fig.height = 7}
-q <- data %>% filter(grepl("^ConcernIronSupp([1-9]|5A)$", Question))
+q <- data %>% filter(grepl("^ConcernIronSupp([1-9]|5A)(\\.FI)?$", Question)) %>% mutate(Question = ifelse(country=="FIN", str_remove(Question, ".FI"), Question), Question = ifelse(Question == "ConcernIronSupp5","ConcernIronSupp5A",Question))
 
 qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = TRUE) %>%   
   mutate(
@@ -738,6 +743,8 @@ plot_type_3(qdata=qdata, country_colors = country_colors, folder_name=FolderName
 ```
 
 ## Reason Supplements
+
+Plot not available yet due to data processing issues.
 
 ```{r, echo=F}
 #Still too much work on this variable homogenization to print it now
