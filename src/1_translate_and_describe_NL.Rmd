@@ -293,6 +293,10 @@ data <- data %>% mutate_at(vars(matches("^ConsequenceFer[1-9]$")), ~ ifelse(. ==
 mutate_at(vars(matches("^ConsequenceFer[1-9]$")), 
             ~ replace_na(., FALSE))
 
+#SymptomsID9 : all of the above -> incorporate in other columns
+data <- data %>% mutate_at(vars(matches("^SymptomsID[1-6]$")), ~ ifelse(SymptomsID9 == TRUE, TRUE, .))
+
+
 ```
 
 
@@ -458,7 +462,7 @@ tmp <- data %>%
   mutate_at(vars(which(colnames(data) %in% c("Knowledge1","Knowledge2","Knowledge3","Knowledge4","KnowledgeHb1","KnowledgeHb2","KnowledgeHb3","KnowledgeHb4","KnowledgeFer1","KnowledgeFer2","KnowledgeFer3","KnowledgeFer4","IronSuppKnowledge1","IronSuppKnowledge2","IronSuppKnowledge3","IronSuppKnowledge4"))), ~ f4(.)) %>% 
   mutate_at(vars(which(str_detect(colnames(data), "_Certainty"))), ~ f5(.)) %>% 
   mutate_at(vars(which(colnames(data) %in% c("AccForIronLoss", "SupplementsUse.NL", "SupplementsOpen", "SupplementsReason6A"))), ~ f6(.))%>% 
-  mutate_at(vars(matches("^SupplementsReason[1-5]$")), ~f5(.)) %>%
+  mutate_at(vars(matches("^SupplementsReason[1-5]$")), ~f6(.)) %>%
   mutate_at(vars(matches("^ConsequenceHb[1-7]$|^SymptomsID[1-9]$|^AccForIronLoss[1-3]$|^AccForIronLoss4A$|^DeferralSource[1-6]$|^DeferralSource2.NL$|^DeferralSource6A$|^SupplementsUse[1-3]A.NL$|^IronSuppKnowledge[1-4]$|^IronSuppSE[1-9]$")), ~ f7(.)) %>%
   mutate_at(vars(matches("IronSuppEffect[1-6A]")), ~ f8(.))%>%
   mutate_at(vars(which(colnames(data) %in% c("IronSuppSanqCondition1", "IronSuppSanqCondition2", "IronSuppSanqCondition3", "IronSuppSanqCondition4", "IronSuppSanqCondition5", "IronSuppSanqCondition6"))), ~ f9(.)) %>%

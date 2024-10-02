@@ -39,15 +39,15 @@ df_list <- lapply(names(data), function(var_name) {
 # Combine all individual data frames into one
 final_df <- do.call(rbind, df_list)
 
-#write csv
-write.csv(final_df, paste0("C:/Users/meule01a/OneDrive - Sanquin/A12 Project Perception survey/02 Scripts/shiny_questionnaire_results/data/countries/",country_codes[i],".csv"), row.names = FALSE)
+#write rds
 saveRDS(final_df, file=paste0("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/rds/",country_codes[i],".RDS"))
 }
 
-files <- list.files("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/rds", full.names = T)
-files<-files[!file.info(files)$isdir]
+files2 <- list.files("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/2. Datasets/rds", full.names = T)
+files2<-files2[!file.info(files2)$isdir]
+print(files2)
 
-file_list <- lapply(files, readRDS)
+file_list <- lapply(files2, readRDS)
 
 # Combine all the data frames using rbind
 final_combined_df <- do.call(rbind, file_list)

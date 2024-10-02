@@ -403,11 +403,10 @@ data <- data %>% select(-"SymptomsID_process")
 data <- data %>%
   mutate(
     # Create binary columns for each predefined answer option using regex to match the content
-    AccForIronLoss1 = sapply(as.character(AccForIronLoss_process), function(x) ifelse(grepl("Eat more iron-rich diet", x), TRUE, FALSE)),
-    AccForIronLoss2 = sapply(as.character(AccForIronLoss_process), function(x) ifelse(grepl("Take multivitamins with iron content", x), TRUE, FALSE)),
-    AccForIronLoss3 = sapply(as.character(AccForIronLoss_process), function(x) ifelse(grepl("Taking iron tablets", x), TRUE, FALSE)),
-    AccForIronLoss3 = sapply(as.character(AccForIronLoss_process), function(x) ifelse(grepl("tablets", x), 1, AccForIronLoss3)),
-    AccForIronLoss5 = sapply(as.character(AccForIronLoss_process), function(x) ifelse(grepl("Do nothing active to replace the loss", x), TRUE, FALSE))
+    AccForIronLoss1 = sapply(as.character(AccForIronLoss_process), function(x) ifelse(grepl("diet", x), TRUE, FALSE)),
+    AccForIronLoss2 = sapply(as.character(AccForIronLoss_process), function(x) ifelse(grepl("multivitamins", x), TRUE, FALSE)),
+    AccForIronLoss3 = sapply(as.character(AccForIronLoss_process), function(x) ifelse(grepl("tablets", x), TRUE, FALSE)),
+    AccForIronLoss5 = sapply(as.character(AccForIronLoss_process), function(x) ifelse(grepl("nothing", x), TRUE, FALSE))
   )
 
 data <- data %>% select(-"AccForIronLoss_process")

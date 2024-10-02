@@ -9,7 +9,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-#rmarkdown::render("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/1. R Scripts/src/summarise_data_across_countries.Rmd", clean=TRUE,output_format='html_document',output_file='L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/4. Results/summarise_data_across_countries.html')
+#rmarkdown::render("L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/1. R Scripts/src/5_summarise_data_across_countries.Rmd", clean=TRUE,output_format='html_document',output_file='L:/DonorMedicin/FORTE/E Internation Donor Perception Survey/B Analysis/R/4. Results/summarise_data_across_countries.html')
 knitr::opts_chunk$set(
 	echo = TRUE,
 	message = FALSE,
@@ -590,7 +590,7 @@ qdata <- merge(q, question_text, by.x = "Question", by.y = "Variable", all.x = T
   mutate(
     Statement = Response,
     Q = sapply(str_split(Question_Text, "[:?]"), function(x) x[1]),
-    answer = ordered(Response, levels=c("Yes", "No", "Never", "Not anymore", "Sometimes", "Every day"))
+    answer = ordered(Response, levels=c("Yes", "No", "I don't know", "Never", "Not anymore", "Sometimes", "Every day"))
   ) %>% 
   droplevels()
 
