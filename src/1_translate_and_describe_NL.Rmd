@@ -81,19 +81,19 @@ names(data) <- gsub("^Q45_6$", "OpinionBloodService6", names(data))
 names(data) <- gsub("^Q45_7$", "OpinionBloodService7", names(data))
 names(data) <- gsub("^Q45_8$", "OpinionBloodService8", names(data))
 
-names(data) <- gsub("^Q19_1$", "Symptoms1", names(data))
-names(data) <- gsub("^Q19_2$", "Symptoms2", names(data))
-names(data) <- gsub("^Q19_3$", "Symptoms3", names(data))
-names(data) <- gsub("^Q19_4$", "Symptoms4", names(data))
-names(data) <- gsub("^Q19_5$", "Symptoms5", names(data))
-names(data) <- gsub("^Q19_6$", "Symptoms6", names(data))
+names(data) <- gsub("^Q19_1$", "Symptoms2", names(data))
+names(data) <- gsub("^Q19_2$", "Symptoms3", names(data))
+names(data) <- gsub("^Q19_3$", "Symptoms5", names(data))
+names(data) <- gsub("^Q19_4$", "Symptoms6", names(data))
+names(data) <- gsub("^Q19_5$", "Symptoms8", names(data))
+names(data) <- gsub("^Q19_6$", "Symptoms9", names(data))
 
-names(data) <- gsub("^Q82_1$", "Symptoms1_Severity", names(data))
-names(data) <- gsub("^Q82_2$", "Symptoms2_Severity", names(data))
-names(data) <- gsub("^Q82_3$", "Symptoms3_Severity", names(data))
-names(data) <- gsub("^Q82_4$", "Symptoms4_Severity", names(data))
-names(data) <- gsub("^Q82_5$", "Symptoms5_Severity", names(data))
-names(data) <- gsub("^Q82_6$", "Symptoms6_Severity", names(data))
+names(data) <- gsub("^Q82_1$", "Symptoms2_Severity", names(data))
+names(data) <- gsub("^Q82_2$", "Symptoms3_Severity", names(data))
+names(data) <- gsub("^Q82_3$", "Symptoms5_Severity", names(data))
+names(data) <- gsub("^Q82_4$", "Symptoms6_Severity", names(data))
+names(data) <- gsub("^Q82_5$", "Symptoms8_Severity", names(data))
+names(data) <- gsub("^Q82_6$", "Symptoms9_Severity", names(data))
 
 names(data) <- gsub("^Q21_1$", "Knowledge1", names(data))
 names(data) <- gsub("^Q21_2$", "Knowledge2", names(data))
@@ -294,7 +294,7 @@ mutate_at(vars(matches("^ConsequenceFer[1-9]$")),
             ~ replace_na(., FALSE))
 
 #SymptomsID9 : all of the above -> incorporate in other columns
-data <- data %>% mutate_at(vars(matches("^SymptomsID[1-6]$")), ~ ifelse(SymptomsID9 == TRUE, TRUE, .))
+data <- data %>% mutate_at(vars(matches("^SymptomsID[1-6]$")), ~ ifelse(SymptomsID9 == 1, 1, .))
 
 
 ```
@@ -457,7 +457,7 @@ data[] <- lapply(data, as.factor)
 # Statements: Totally disagree - Totally agree
 tmp <- data %>% 
   mutate_at(vars(which(str_detect(colnames(data), "\\bOpinionBloodService1\\b|\\bOpinionBloodService2\\b|\\bOpinionBloodService3\\b|\\bOpinionBloodService4\\b|\\bOpinionBloodService5\\b|\\bOpinionBloodService6\\b|\\bOpinionBloodService7\\b|\\bOpinionBloodService8\\b|\\bIronSuppSanq1\\b|\\bIronSuppSanq2\\b|\\bIronSuppSanq3\\b|\\bIronSuppSanq4\\b|\\bIronSuppSanq5\\b|\\bIronSuppSanq6\\b|\\bIronSuppSanq7\\b|\\bIronSuppSanq8\\b|\\bIronSuppSanq9\\b"))), ~ f1(.)) %>% 
-  mutate_at(vars(which(colnames(data) %in% c("Symptoms1", "Symptoms2", "Symptoms3", "Symptoms4", "Symptoms5", "Symptoms6"))), ~ f2(.)) %>% 
+  mutate_at(vars(which(colnames(data) %in% c("Symptoms1", "Symptoms2", "Symptoms3", "Symptoms4", "Symptoms5", "Symptoms6", "Symptoms7", "Symptoms8", "Symptoms9"))), ~ f2(.)) %>% 
   mutate_at(vars(which(str_detect(colnames(data), "Measurement"))), ~ f3(.)) %>% 
   mutate_at(vars(which(colnames(data) %in% c("Knowledge1","Knowledge2","Knowledge3","Knowledge4","KnowledgeHb1","KnowledgeHb2","KnowledgeHb3","KnowledgeHb4","KnowledgeFer1","KnowledgeFer2","KnowledgeFer3","KnowledgeFer4","IronSuppKnowledge1","IronSuppKnowledge2","IronSuppKnowledge3","IronSuppKnowledge4"))), ~ f4(.)) %>% 
   mutate_at(vars(which(str_detect(colnames(data), "_Certainty"))), ~ f5(.)) %>% 
